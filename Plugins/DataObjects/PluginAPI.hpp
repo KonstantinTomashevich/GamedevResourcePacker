@@ -8,6 +8,8 @@ namespace DataObjectsPlugin
 class PluginAPI : public GamedevResourcePacker::PluginAPI
 {
 public:
+    virtual ~PluginAPI () = default;
+
     virtual std::string GetName () const;
 };
 

@@ -3,16 +3,14 @@
 #include <boost/dll.hpp>
 
 #include "PluginAPI.hpp"
+#include "PluginManager.hpp"
 
 namespace GamedevResourcePacker
 {
 int Main (int argCount, char **argValues)
 {
-    boost::dll::fs::path pluginDir ("plugins");
-    boost::shared_ptr <PluginAPI> testPlugin =
-        boost::dll::import <PluginAPI> (pluginDir / "DataObjects", "plugin", boost::dll::load_mode::append_decorations);
-
-    std::cout << testPlugin->GetName ();
+    PluginManager pluginManager;
+    pluginManager.Load ();
     return 0;
 }
 }

@@ -3,7 +3,7 @@ project(GamedevResourcePacker)
 
 set(CMAKE_CXX_STANDARD_REQUIRED 11)
 include_directories(${CMAKE_SOURCE_DIR})
-find_package(Boost COMPONENTS filesystem system headers REQUIRED)
+find_package(Boost COMPONENTS filesystem system log headers REQUIRED)
 
 add_subdirectory(Core)
 add_subdirectory(Plugins)

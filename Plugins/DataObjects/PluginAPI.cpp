@@ -3,3 +3,8 @@ std::string GamedevResourcePacker::DataObjectsPlugin::PluginAPI::GetName () cons
 {
     return "Data Objects";
 }
+
+bool GamedevResourcePacker::DataObjectsPlugin::PluginAPI::Load (const boost::filesystem::path &configFolder)
+{
+    return false;
+}

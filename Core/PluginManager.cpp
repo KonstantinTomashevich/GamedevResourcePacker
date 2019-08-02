@@ -20,7 +20,7 @@ PluginManager::~PluginManager ()
 
 }
 
-void PluginManager::Load ()
+void PluginManager::LoadPlugins ()
 {
     Path pluginDir ("plugins");
     DirIterator iterator (pluginDir);
@@ -36,17 +36,38 @@ void PluginManager::Load ()
             boost::shared_ptr <PluginAPI> plugin = boost::dll::import <PluginAPI> (path, "plugin");
             if (plugin)
             {
-                BOOST_LOG_TRIVIAL(info) << "Loaded plugin \"" << plugin->GetName () << "\" from " << path.string () << ".";
+                BOOST_LOG_TRIVIAL(info) << "Loaded plugin \"" << plugin->GetName () << "\" from " << path.string ()
+                                        << ".";
                 plugins_.push_back (plugin);
             }
             else
             {
-                BOOST_LOG_TRIVIAL(info) << "Unable to load plugin from " << path.string () << ".";
+                BOOST_LOG_TRIVIAL(error) << "Unable to load plugin from " << path.string () << ".";
             }
         }
 
         iterator++;
     }
+}
+
+bool PluginManager::LoadPluginsConfig (const Path &configFolder)
+{
+    BOOST_LOG_TRIVIAL(info) << "Loading plugins config from " << configFolder.string () << ".";
+    for (auto &plugin : plugins_)
+    {
+        BOOST_LOG_TRIVIAL(info) << "Loading config of plugin \"" << plugin->GetName () << "\".";
+        if (plugin->Load (configFolder))
+        {
+            BOOST_LOG_TRIVIAL(info) << "Done loading config for plugin \"" << plugin->GetName () << "\".";
+        }
+        else
+        {
+            BOOST_LOG_TRIVIAL(fatal) << "Unable to load config for plugin \"" << plugin->GetName () << "\".";
+            return false;
+        }
+    }
+
+    return true;
 }
 
 const PluginVector &PluginManager::GetPluginsVector () const

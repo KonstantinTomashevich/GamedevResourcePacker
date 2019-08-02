@@ -14,7 +14,8 @@ public:
     PluginManager ();
     virtual ~PluginManager ();
 
-    void Load ();
+    void LoadPlugins ();
+    bool LoadPluginsConfig (const boost::filesystem::path &configFolder);
     const PluginVector &GetPluginsVector () const;
 
 private:

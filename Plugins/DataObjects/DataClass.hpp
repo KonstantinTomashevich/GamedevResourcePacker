@@ -11,7 +11,7 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-class DataClass
+class BOOST_SYMBOL_EXPORT DataClass
 {
 public:
     using Field = struct

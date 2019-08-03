@@ -46,8 +46,8 @@ void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
 {
     try
     {
-        name_ = tree.get_child ("<xmlattr>.name").data ().c_str ();
-        for (PTree::value_type node : tree)
+        name_ = tree.get_child ("class.<xmlattr>.name").data ().c_str ();
+        for (PTree::value_type node : tree.get_child ("class"))
         {
             if (node.first == "field")
             {
@@ -58,7 +58,7 @@ void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
 
                 field.array = attr.get_child ("array").data () == "true";
                 field.reference = attr.get_child ("reference").data () == "true";
-                field.readonly = attr.get_child ("reference").data () == "true";
+                field.readonly = attr.get_child ("readonly").data () == "true";
                 fields_.push_back (field);
             }
         }

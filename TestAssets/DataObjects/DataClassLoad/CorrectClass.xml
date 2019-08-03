@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class name="Character">
+    <field name="x" typeName="float" array="false" reference="false" readonly="false"/>
+    <field name="y" typeName="float" array="false" reference="false" readonly="false"/>
+    <field name="health" typeName="float" array="false" reference="false" readonly="false"/>
+    <field name="equipment" typeName="EquipmentItem" array="true" reference="false" readonly="true"/>
+    <field name="archetype" typeName="Archetype" array="false" reference="true" readonly="true"/>
+</class>

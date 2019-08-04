@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class name="TileSet">
+    <field name="atlasImage" typeName="string" array="false" reference="false" readonly="true"/>
+    <field name="rows" typeName="int" array="false" reference="false" readonly="true"/>
+    <field name="cols" typeName="int" array="false" reference="false" readonly="true"/>
+</class>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class name="MapObject">
+    <field name="x" typeName="int" array="false" reference="false" readonly="false"/>
+    <field name="y" typeName="int" array="false" reference="false" readonly="false"/>
+    <field name="type" typeName="int" array="false" reference="false" readonly="true"/>
+</class>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class name="Tile">
+    <field name="type" typeName="int" array="false" reference="false" readonly="false"/>
+</class>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data-object name="Default">
+    <TileSet atlasImage="Images/DefaultAtlas.png" rows="4" cols="2"/>
+</data-object>

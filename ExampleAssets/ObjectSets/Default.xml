@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data-object name="Default">
+    <MapObjectSet>
+        <types>
+            <MapObjectPrefab image="Images/DefaultObject0.png" width="2" height="2" />
+            <MapObjectPrefab image="Images/DefaultObject1.png" width="2" height="3" />
+            <MapObjectPrefab image="Images/DefaultObject2.png" width="3" height="2" />
+            <MapObjectPrefab image="Images/DefaultObject3.png" width="1" height="2" />
+            <MapObjectPrefab image="Images/DefaultObject4.png" width="2" height="1" />
+            <MapObjectPrefab image="Images/DefaultObject5.png" width="3" height="1" />
+            <MapObjectPrefab image="Images/DefaultObject6.png" width="1" height="3" />
+            <MapObjectPrefab image="Images/DefaultObject7.png" width="3" height="3" />
+        </types>
+    </MapObjectSet>
+</data-object>

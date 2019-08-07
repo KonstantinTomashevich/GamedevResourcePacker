@@ -4,6 +4,7 @@
 
 #include "PluginAPI.hpp"
 #include "PluginManager.hpp"
+#include "ObjectManager.hpp"
 
 #define INCORRECT_ARGS_CODE -1
 #define UNABLE_TO_LOAD_CONFIG -2
@@ -12,9 +13,13 @@ namespace GamedevResourcePacker
 {
 int Main (int argCount, char **argValues)
 {
-    if (argCount != 2)
+    if (argCount != 4)
     {
-        printf ("Expected arguments:\n    Variant 1. 1 arg:\n        - plugin config folder.\n");
+        printf ("Expected arguments:\n"
+                "    Variant 1. 3 args:\n"
+                "        - plugin config folder.\n"
+                "        - assets folder.\n"
+                "        - package output folder.\n");
         return INCORRECT_ARGS_CODE;
     }
 
@@ -27,6 +32,10 @@ int Main (int argCount, char **argValues)
         printf ("Unable to load plugins config, aborting execution.");
         return UNABLE_TO_LOAD_CONFIG;
     }
+
+    ObjectManager objectManager;
+    boost::filesystem::path assetsFolder (argValues[2]);
+    objectManager.ScanAssetsDir (assetsFolder, &pluginManager);
 
     return 0;
 }

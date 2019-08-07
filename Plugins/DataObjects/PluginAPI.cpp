@@ -16,7 +16,7 @@ PluginAPI::~PluginAPI ()
     }
 }
 
-std::string PluginAPI::GetName () const
+const char *PluginAPI::GetName () const
 {
     return "Data Objects";
 }
@@ -59,6 +59,12 @@ bool PluginAPI::Load (const Path &configFolder)
     }
 
     return true;
+}
+
+Object *PluginAPI::Capture (const boost::filesystem::path &asset)
+{
+    // TODO: Implement.
+    return nullptr;
 }
 }
 }

@@ -18,6 +18,10 @@ public:
     bool LoadPluginsConfig (const boost::filesystem::path &configFolder);
     const PluginVector &GetPluginsVector () const;
 
+    /// Calls Capture method for each plugin until one of them returns valid object.
+    /// Returns nullptr if all plugins rejected to given capture this asset.
+    Object *Capture (const boost::filesystem::path &asset);
+
 private:
     PluginVector plugins_;
 };

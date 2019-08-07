@@ -74,4 +74,19 @@ const PluginVector &PluginManager::GetPluginsVector () const
 {
     return plugins_;
 }
+
+Object *PluginManager::Capture (const boost::filesystem::path &asset)
+{
+    Object *object = nullptr;
+    for (const auto &pluginApiPtr : plugins_)
+    {
+        object = pluginApiPtr->Capture (asset);
+        if (object != nullptr)
+        {
+            return object;
+        }
+    }
+
+    return nullptr;
+}
 }

@@ -12,8 +12,9 @@ class PluginAPI : public GamedevResourcePacker::PluginAPI
 public:
     virtual ~PluginAPI ();
 
-    virtual std::string GetName () const;
+    virtual const char *GetName () const;
     virtual bool Load (const boost::filesystem::path &configFolder);
+    virtual Object *Capture (const boost::filesystem::path &asset);
 
 private:
     std::unordered_map <std::string, DataClass *> dataClasses_;

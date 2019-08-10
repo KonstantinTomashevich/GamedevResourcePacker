@@ -19,10 +19,6 @@ public:
 private:
     std::unordered_map <std::string, DataClass *> dataClasses_;
 };
-
-extern "C" BOOST_SYMBOL_EXPORT PluginAPI plugin;
-
-PluginAPI plugin;
 }
 }
 

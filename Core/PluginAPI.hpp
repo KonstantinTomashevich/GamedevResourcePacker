@@ -2,7 +2,7 @@
 #include <string>
 #include <boost/config.hpp>
 #include <boost/filesystem.hpp>
-#include "Object.hpp"
+#include <Shared/Object.hpp>
 
 namespace GamedevResourcePacker
 {

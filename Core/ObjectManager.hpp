@@ -1,5 +1,5 @@
 #pragma once
-#include "Object.hpp"
+#include <Shared/Object.hpp>
 #include "PluginManager.hpp"
 #include <unordered_map>
 #include <boost/filesystem.hpp>

@@ -6,7 +6,7 @@ namespace GamedevResourcePacker
 {
 class PluginAPI;
 
-class BOOST_SYMBOL_VISIBLE Object
+class BOOST_SYMBOL_EXPORT Object
 {
 public:
     virtual ~Object () = default;

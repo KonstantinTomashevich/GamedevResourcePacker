@@ -1,6 +1,7 @@
 #include "DataClass.hpp"
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/log/trivial.hpp>
+#include <Core/Exception.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -31,17 +32,6 @@ const DataClass::FieldVector &DataClass::GetFields () const
     return fields_;
 }
 
-DataClass::XMLParseException::XMLParseException (const std::string &info)
-    : info_ (info)
-{
-
-}
-
-const char *DataClass::XMLParseException::what () const _GLIBCXX_USE_NOEXCEPT
-{
-    return info_.c_str ();
-}
-
 void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
 {
     try
@@ -66,7 +56,7 @@ void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
     catch (boost::exception &exception)
     {
         BOOST_LOG_TRIVIAL (fatal) << "Exception caught: " << boost::diagnostic_information (exception);
-        BOOST_THROW_EXCEPTION (XMLParseException ("Unable to parse xml because of boost error!"));
+        BOOST_THROW_EXCEPTION (Exception <XMLParseException> ("Unable to parse xml because of boost error!"));
     }
 }
 }

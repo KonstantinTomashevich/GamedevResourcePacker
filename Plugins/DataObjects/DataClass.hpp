@@ -31,14 +31,7 @@ public:
     const std::string &GetName () const;
     const FieldVector &GetFields () const;
 
-    class XMLParseException : public boost::exception, public std::exception
-    {
-    public:
-        explicit XMLParseException (const std::string &info);
-        std::string info_;
-
-        virtual const char *what () const _GLIBCXX_TXN_SAFE_DYN _GLIBCXX_USE_NOEXCEPT;
-    };
+    class XMLParseException;
 
 private:
     void LoadFromTree (boost::property_tree::ptree &tree);

@@ -37,7 +37,7 @@ void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
     try
     {
         name_ = tree.get_child ("class.<xmlattr>.name").data ().c_str ();
-        for (PTree::value_type node : tree.get_child ("class"))
+        for (PTree::value_type &node : tree.get_child ("class"))
         {
             if (node.first == "field")
             {

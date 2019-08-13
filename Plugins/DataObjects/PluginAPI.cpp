@@ -1,5 +1,7 @@
 #include "PluginAPI.hpp"
+#include "DataObject.hpp"
 #include <boost/log/trivial.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -63,8 +65,77 @@ bool PluginAPI::Load (const Path &configFolder)
 
 Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 {
-    // TODO: Implement.
+    if (asset.extension () == ".xml")
+    {
+        boost::property_tree::ptree tree;
+        boost::property_tree::read_xml (asset.string (), tree);
+
+        auto xmlRoot = tree.get_child_optional ("data-object");
+        if (!xmlRoot.is_initialized ())
+        {
+            return nullptr;
+        }
+
+        if (xmlRoot->size () > 2)
+        {
+            BOOST_LOG_TRIVIAL (warning)
+                << "Data Objects: given object has more than one root child. "
+                   "Only first will be parsed, others will be ignored.";
+        }
+
+        auto name = xmlRoot->get_child_optional ("<xmlattr>.name");
+        if (!name.is_initialized ())
+        {
+            BOOST_LOG_TRIVIAL (error) << "Data Objects: given object has no name, so it will be ignored.";
+            return nullptr;
+        }
+
+        boost::property_tree::ptree rootObject;
+        std::string rootObjectName;
+
+        for (auto child : *xmlRoot)
+        {
+            if (child.first != "<xmlattr>")
+            {
+                rootObject = child.second;
+                rootObjectName = child.first;
+                break;
+            }
+        }
+
+        if (rootObject.empty ())
+        {
+            BOOST_LOG_TRIVIAL (error) << "Data Objects: given object has empty object, so it will be ignored.";
+            return nullptr;
+        }
+
+        try
+        {
+            rootObject.get_child_optional ("<xmlattr>");
+            DataObject *object = new DataObject (name->data (), rootObjectName, rootObject, this);
+            return object;
+        }
+        catch (boost::exception &exception)
+        {
+            BOOST_LOG_TRIVIAL (error) << "Exception caught: " << boost::diagnostic_information (exception);
+            BOOST_LOG_TRIVIAL (error) << "Data Objects: unable to parse given data object because of exception.";
+            return nullptr;
+        }
+    }
+
     return nullptr;
+}
+
+DataClass *PluginAPI::GetClassByName (const std::string &name) const
+{
+    try
+    {
+        return dataClasses_.at (name);
+    }
+    catch (std::out_of_range &exception)
+    {
+        return nullptr;
+    }
 }
 }
 }

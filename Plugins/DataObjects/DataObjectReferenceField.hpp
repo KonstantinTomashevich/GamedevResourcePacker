@@ -13,6 +13,8 @@ public:
     DataObjectReferenceField (const std::string &typeName, PTree *source);
     virtual ~DataObjectReferenceField () = default;
 
+    virtual void Print (std::ostream &output, int indentation = 0) const;
+
 private:
     std::string typeName_;
     std::string value_;

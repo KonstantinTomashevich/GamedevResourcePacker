@@ -1,5 +1,6 @@
 #pragma once
 #include <Shared/Object.hpp>
+#include <iostream>
 #include <boost/property_tree/ptree.hpp>
 #include "DataObjectField.hpp"
 
@@ -15,6 +16,8 @@ public:
 
     DataObject (const std::string &name, const std::string &rootName, PTree &root, PluginAPI *owner);
     virtual ~DataObject ();
+
+    void Print (std::ostream &output) const;
 
 private:
     DataObjectField *rootField_;

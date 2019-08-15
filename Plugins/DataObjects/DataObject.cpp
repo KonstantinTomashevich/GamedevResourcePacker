@@ -16,5 +16,10 @@ DataObject::~DataObject ()
 {
     delete rootField_;
 }
+
+void DataObject::Print (std::ostream &output) const
+{
+    rootField_->Print (output);
+}
 }
 }

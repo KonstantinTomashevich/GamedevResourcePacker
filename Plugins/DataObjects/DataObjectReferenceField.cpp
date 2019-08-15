@@ -10,5 +10,10 @@ DataObjectReferenceField::DataObjectReferenceField (const std::string &typeName,
 {
 
 }
+
+void DataObjectReferenceField::Print (std::ostream &output, int indentation) const
+{
+    Indent (output, indentation) << "Reference to \"" << value_ << "\" of type \"" << typeName_ << "\"" << std::endl;
+}
 }
 }

@@ -17,6 +17,11 @@ public:
 
     virtual ~DataObjectSimpleField () = default;
 
+    virtual void Print (std::ostream &output, int indentation = 0) const
+    {
+        Indent (output, indentation) << "(simple field) " << value_ << std::endl;
+    }
+
 private:
     T value_;
 };
@@ -31,6 +36,11 @@ public:
     }
 
     virtual ~DataObjectSimpleField () = default;
+
+    virtual void Print (std::ostream &output, int indentation = 0) const
+    {
+        Indent (output, indentation) << "(simple field) \"" << value_ << "\"" << std::endl;
+    }
 
 private:
     std::string value_;

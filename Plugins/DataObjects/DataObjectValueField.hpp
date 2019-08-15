@@ -16,6 +16,8 @@ public:
     DataObjectValueField (PluginAPI *api, const std::string &typeName, PTree *source);
     virtual ~DataObjectValueField ();
 
+    virtual void Print (std::ostream &output, int indentation = 0) const;
+
     class TypeNotFound;
     class FieldNotFound;
 

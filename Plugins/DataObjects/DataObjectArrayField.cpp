@@ -36,6 +36,15 @@ DataObjectArrayField::~DataObjectArrayField ()
     }
 }
 
+void DataObjectArrayField::Print (std::ostream &output, int indentation) const
+{
+    Indent (output, indentation) << "Array of size " << objects_.size () << std::endl;
+    for (DataObjectField *object : objects_)
+    {
+        object->Print (output, indentation + 4);
+    }
+}
+
 static DataObjectField *IntConstructor (DataObjectField::PTree *source)
 {
     return new DataObjectIntField (source);

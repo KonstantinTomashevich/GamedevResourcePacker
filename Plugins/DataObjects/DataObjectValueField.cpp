@@ -12,10 +12,11 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &typeName, DataObjectField::PTree &source)
+DataObjectValueField::DataObjectValueField (
+    DataClassProvider *provider, const std::string &typeName, DataObjectField::PTree &source)
     : typeName_ (typeName), fields_ ()
 {
-    DataClass *type = api->GetClassByName (typeName);
+    DataClass *type = provider->GetDataClass (typeName);
     if (type == nullptr)
     {
         BOOST_THROW_EXCEPTION (Exception <TypeNotFound> ("Unable to find class " + typeName + "!"));
@@ -36,7 +37,7 @@ DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &t
 
         if (field.array)
         {
-            fields_.push_back (new DataObjectArrayField (api, field, *node.get_ptr ()));
+            fields_.push_back (new DataObjectArrayField (provider, field, *node.get_ptr ()));
         }
         else if (field.reference)
         {
@@ -56,7 +57,7 @@ DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &t
         }
         else
         {
-            fields_.push_back (new DataObjectValueField (api, field.typeName, *node.get_ptr ()));
+            fields_.push_back (new DataObjectValueField (provider, field.typeName, *node.get_ptr ()));
         }
     }
 }

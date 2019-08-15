@@ -1,6 +1,6 @@
 #pragma once
 #include "DataObjectField.hpp"
-#include "DataClass.hpp"
+#include "DataClassProvider.hpp"
 #include <vector>
 
 namespace GamedevResourcePacker
@@ -11,7 +11,7 @@ class PluginAPI;
 class DataObjectArrayField : public DataObjectField
 {
 public:
-    DataObjectArrayField (PluginAPI *api, const DataClass::Field &sourceField, PTree &source);
+    DataObjectArrayField (DataClassProvider *provider, const DataClass::Field &sourceField, PTree &source);
     virtual ~DataObjectArrayField ();
 
     virtual void Print (std::ostream &output, int indentation = 0) const;
@@ -21,7 +21,7 @@ public:
 private:
     using ElementConstructor = std::function <DataObjectField * (PTree & )>;
 
-    static ElementConstructor GetElementConstructor (PluginAPI *api, const DataClass::Field &sourceField);
+    static ElementConstructor GetElementConstructor (DataClassProvider *provider, const DataClass::Field &sourceField);
 
     std::vector <DataObjectField *> objects_;
 };

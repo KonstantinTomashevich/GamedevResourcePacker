@@ -10,10 +10,10 @@ namespace GamedevResourcePacker
 namespace DataObjectsPlugin
 {
 DataObjectArrayField::DataObjectArrayField (
-    PluginAPI *api, const DataClass::Field &sourceField, DataObjectField::PTree &source)
+    DataClassProvider *provider, const DataClass::Field &sourceField, DataObjectField::PTree &source)
     : objects_ ()
 {
-    DataObjectArrayField::ElementConstructor constructor = GetElementConstructor (api, sourceField);
+    DataObjectArrayField::ElementConstructor constructor = GetElementConstructor (provider, sourceField);
 
     for (PTree::value_type &node : source)
     {
@@ -61,7 +61,7 @@ static DataObjectField *StringConstructor (DataObjectField::PTree &source)
 }
 
 DataObjectArrayField::ElementConstructor DataObjectArrayField::GetElementConstructor (
-    PluginAPI *api, const DataClass::Field &sourceField)
+    DataClassProvider *provider, const DataClass::Field &sourceField)
 {
     if (sourceField.typeName == "int")
     {
@@ -77,13 +77,13 @@ DataObjectArrayField::ElementConstructor DataObjectArrayField::GetElementConstru
     }
     else if (sourceField.reference)
     {
-        return [api, &sourceField] (PTree &source) -> DataObjectField *
+        return [&sourceField] (PTree &source) -> DataObjectField *
         { return new DataObjectReferenceField (sourceField.typeName, source); };
     }
     else
     {
-        return [api, &sourceField] (PTree &source) -> DataObjectField *
-        { return new DataObjectValueField (api, sourceField.typeName, source); };
+        return [provider, &sourceField] (PTree &source) -> DataObjectField *
+        { return new DataObjectValueField (provider, sourceField.typeName, source); };
     }
 }
 }

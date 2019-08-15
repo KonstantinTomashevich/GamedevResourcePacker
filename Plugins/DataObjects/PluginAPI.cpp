@@ -10,14 +10,6 @@ namespace DataObjectsPlugin
 using Path = boost::filesystem::path;
 using DirIterator = boost::filesystem::directory_iterator;
 
-PluginAPI::~PluginAPI ()
-{
-    for (auto &nameDataClassPair : dataClasses_)
-    {
-        delete nameDataClassPair.second;
-    }
-}
-
 const char *PluginAPI::GetName () const
 {
     return "Data Objects";
@@ -37,9 +29,8 @@ bool PluginAPI::Load (const Path &configFolder)
             try
             {
                 DataClass *dataClass = new DataClass (iterator->path ());
-                if (dataClasses_.count (dataClass->GetName ()) == 0)
+                if (dataClassProvider_.AddDataClass (dataClass))
                 {
-                    dataClasses_.insert (std::make_pair (dataClass->GetName (), dataClass));
                     BOOST_LOG_TRIVIAL (info) << "Loaded class " << dataClass->GetName () << " from file " <<
                                              iterator->path () << ".";
                 }
@@ -112,7 +103,7 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
         try
         {
             rootObject.get_child_optional ("<xmlattr>");
-            DataObject *object = new DataObject (name->data (), rootObjectName, rootObject, this);
+            DataObject *object = new DataObject (name->data (), rootObjectName, rootObject, this, &dataClassProvider_);
             return object;
         }
         catch (boost::exception &exception)
@@ -128,14 +119,7 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 
 DataClass *PluginAPI::GetClassByName (const std::string &name) const
 {
-    try
-    {
-        return dataClasses_.at (name);
-    }
-    catch (std::out_of_range &exception)
-    {
-        return nullptr;
-    }
+    return dataClassProvider_.GetDataClass (name);
 }
 }
 }

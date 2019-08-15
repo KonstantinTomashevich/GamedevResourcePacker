@@ -1,5 +1,6 @@
 #pragma once
 #include "DataObjectField.hpp"
+#include "DataClassProvider.hpp"
 #include <boost/container/small_vector.hpp>
 
 #define PREALLOCATED_FIELD_DATA_COUNT 15
@@ -8,11 +9,10 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-class PluginAPI;
 class DataObjectValueField : public DataObjectField
 {
 public:
-    DataObjectValueField (PluginAPI *api, const std::string &typeName, PTree &source);
+    DataObjectValueField (DataClassProvider *provider, const std::string &typeName, PTree &source);
     virtual ~DataObjectValueField ();
 
     virtual void Print (std::ostream &output, int indentation = 0) const;

@@ -6,8 +6,9 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-DataObject::DataObject (const std::string &name, const std::string &rootName, DataObject::PTree &root, PluginAPI *owner)
-    : Object (owner, name, rootName), rootField_ (new DataObjectValueField (owner, rootName, root))
+DataObject::DataObject (const std::string &name, const std::string &rootName, DataObject::PTree &root,
+    PluginAPI *owner, DataClassProvider *provider)
+    : Object (owner, name, rootName), rootField_ (new DataObjectValueField (provider, rootName, root))
 {
 
 }

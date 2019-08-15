@@ -10,7 +10,7 @@ class PluginAPI;
 class DataObjectReferenceField : public DataObjectField
 {
 public:
-    DataObjectReferenceField (const std::string &typeName, PTree *source);
+    DataObjectReferenceField (const std::string &typeName, PTree &source);
     virtual ~DataObjectReferenceField () = default;
 
     virtual void Print (std::ostream &output, int indentation = 0) const;

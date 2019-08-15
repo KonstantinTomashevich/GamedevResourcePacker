@@ -11,7 +11,7 @@ class PluginAPI;
 class DataObjectArrayField : public DataObjectField
 {
 public:
-    DataObjectArrayField (PluginAPI *api, const DataClass::Field &sourceField, PTree *source);
+    DataObjectArrayField (PluginAPI *api, const DataClass::Field &sourceField, PTree &source);
     virtual ~DataObjectArrayField ();
 
     virtual void Print (std::ostream &output, int indentation = 0) const;
@@ -19,7 +19,7 @@ public:
     class InnerElementHasOtherType;
 
 private:
-    using ElementConstructor = std::function <DataObjectField * (PTree * )>;
+    using ElementConstructor = std::function <DataObjectField * (PTree & )>;
 
     static ElementConstructor GetElementConstructor (PluginAPI *api, const DataClass::Field &sourceField);
 

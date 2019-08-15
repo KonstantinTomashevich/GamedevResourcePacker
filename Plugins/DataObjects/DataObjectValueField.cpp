@@ -12,7 +12,7 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &typeName, DataObjectField::PTree *source)
+DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &typeName, DataObjectField::PTree &source)
     : typeName_ (typeName), fields_ ()
 {
     DataClass *type = api->GetClassByName (typeName);
@@ -24,10 +24,10 @@ DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &t
     for (auto &field : type->GetFields ())
     {
         // TODO: Catch and print as exception situations where arrays and value-classes are defined by attribute.
-        auto node = source->get_child_optional ("<xmlattr>." + field.name);
+        auto node = source.get_child_optional ("<xmlattr>." + field.name);
         if (!node.is_initialized ())
         {
-            node = source->get_child_optional (field.name);
+            node = source.get_child_optional (field.name);
             if (!node.is_initialized ())
             {
                 BOOST_THROW_EXCEPTION (Exception <FieldNotFound> ("Unable to find field " + field.name + "!"));
@@ -36,27 +36,27 @@ DataObjectValueField::DataObjectValueField (PluginAPI *api, const std::string &t
 
         if (field.array)
         {
-            fields_.push_back (new DataObjectArrayField (api, field, node.get_ptr ()));
+            fields_.push_back (new DataObjectArrayField (api, field, *node.get_ptr ()));
         }
         else if (field.reference)
         {
-            fields_.push_back (new DataObjectReferenceField (field.typeName, node.get_ptr ()));
+            fields_.push_back (new DataObjectReferenceField (field.typeName, *node.get_ptr ()));
         }
         else if (field.typeName == "int")
         {
-            fields_.push_back (new DataObjectIntField (node.get_ptr ()));
+            fields_.push_back (new DataObjectIntField (*node.get_ptr ()));
         }
         else if (field.typeName == "float")
         {
-            fields_.push_back (new DataObjectFloatField (node.get_ptr ()));
+            fields_.push_back (new DataObjectFloatField (*node.get_ptr ()));
         }
         else if (field.typeName == "string")
         {
-            fields_.push_back (new DataObjectStringField (node.get_ptr ()));
+            fields_.push_back (new DataObjectStringField (*node.get_ptr ()));
         }
         else
         {
-            fields_.push_back (new DataObjectValueField (api, field.typeName, node.get_ptr ()));
+            fields_.push_back (new DataObjectValueField (api, field.typeName, *node.get_ptr ()));
         }
     }
 }

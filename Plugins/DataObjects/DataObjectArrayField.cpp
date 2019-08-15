@@ -10,12 +10,12 @@ namespace GamedevResourcePacker
 namespace DataObjectsPlugin
 {
 DataObjectArrayField::DataObjectArrayField (
-    PluginAPI *api, const DataClass::Field &sourceField, DataObjectField::PTree *source)
+    PluginAPI *api, const DataClass::Field &sourceField, DataObjectField::PTree &source)
     : objects_ ()
 {
     DataObjectArrayField::ElementConstructor constructor = GetElementConstructor (api, sourceField);
 
-    for (PTree::value_type &node : *source)
+    for (PTree::value_type &node : source)
     {
         if (node.first == "<xmlattr>") continue;
         if (node.first != sourceField.typeName)
@@ -24,7 +24,7 @@ DataObjectArrayField::DataObjectArrayField (
                 sourceField.typeName + ".");
         }
 
-        objects_.push_back (constructor (&node.second));
+        objects_.push_back (constructor (node.second));
     }
 }
 
@@ -45,17 +45,17 @@ void DataObjectArrayField::Print (std::ostream &output, int indentation) const
     }
 }
 
-static DataObjectField *IntConstructor (DataObjectField::PTree *source)
+static DataObjectField *IntConstructor (DataObjectField::PTree &source)
 {
     return new DataObjectIntField (source);
 }
 
-static DataObjectField *FloatConstructor (DataObjectField::PTree *source)
+static DataObjectField *FloatConstructor (DataObjectField::PTree &source)
 {
     return new DataObjectFloatField (source);
 }
 
-static DataObjectField *StringConstructor (DataObjectField::PTree *source)
+static DataObjectField *StringConstructor (DataObjectField::PTree &source)
 {
     return new DataObjectStringField (source);
 }
@@ -77,12 +77,12 @@ DataObjectArrayField::ElementConstructor DataObjectArrayField::GetElementConstru
     }
     else if (sourceField.reference)
     {
-        return [api, &sourceField] (PTree *source) -> DataObjectField *
+        return [api, &sourceField] (PTree &source) -> DataObjectField *
         { return new DataObjectReferenceField (sourceField.typeName, source); };
     }
     else
     {
-        return [api, &sourceField] (PTree *source) -> DataObjectField *
+        return [api, &sourceField] (PTree &source) -> DataObjectField *
         { return new DataObjectValueField (api, sourceField.typeName, source); };
     }
 }

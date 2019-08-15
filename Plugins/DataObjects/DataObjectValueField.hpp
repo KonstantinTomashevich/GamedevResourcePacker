@@ -12,8 +12,7 @@ class PluginAPI;
 class DataObjectValueField : public DataObjectField
 {
 public:
-    // TODO: Maybe use references instead of pointers?
-    DataObjectValueField (PluginAPI *api, const std::string &typeName, PTree *source);
+    DataObjectValueField (PluginAPI *api, const std::string &typeName, PTree &source);
     virtual ~DataObjectValueField ();
 
     virtual void Print (std::ostream &output, int indentation = 0) const;

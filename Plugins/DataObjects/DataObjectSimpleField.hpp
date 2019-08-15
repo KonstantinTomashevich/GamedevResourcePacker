@@ -10,9 +10,9 @@ namespace DataObjectsPlugin
 template <typename T> class DataObjectSimpleField : public DataObjectField
 {
 public:
-    explicit DataObjectSimpleField (PTree *source)
+    explicit DataObjectSimpleField (PTree &source)
     {
-        value_ = boost::lexical_cast <T> (source->data ());
+        value_ = boost::lexical_cast <T> (source.data ());
     }
 
     virtual ~DataObjectSimpleField () = default;
@@ -29,8 +29,8 @@ private:
 template <> class DataObjectSimpleField <std::string> : public DataObjectField
 {
 public:
-    explicit DataObjectSimpleField (PTree *source)
-        : value_ (source->data ())
+    explicit DataObjectSimpleField (PTree &source)
+        : value_ (source.data ())
     {
 
     }

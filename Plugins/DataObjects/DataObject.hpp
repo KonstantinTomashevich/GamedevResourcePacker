@@ -10,7 +10,7 @@ namespace GamedevResourcePacker
 namespace DataObjectsPlugin
 {
 class PluginAPI;
-class DataObject : public Object
+class BOOST_SYMBOL_EXPORT DataObject : public Object
 {
 public:
     using PTree = boost::property_tree::ptree;

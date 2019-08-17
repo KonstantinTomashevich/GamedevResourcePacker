@@ -25,7 +25,7 @@ public:
 
     using FieldVector = boost::container::small_vector <Field, PREALLOCATED_FIELDS_COUNT>;
 
-    DataClass (const boost::filesystem::path &xmlPath);
+    explicit DataClass (const boost::filesystem::path &xmlPath);
     virtual ~DataClass ();
 
     const std::string &GetName () const;

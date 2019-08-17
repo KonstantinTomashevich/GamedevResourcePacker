@@ -102,7 +102,6 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 
         try
         {
-            rootObject.get_child_optional ("<xmlattr>");
             DataObject *object = new DataObject (name->data (), rootObjectName, rootObject, this, &dataClassProvider_);
             return object;
         }

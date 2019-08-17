@@ -20,7 +20,8 @@ DataObject::~DataObject ()
 
 void DataObject::Print (std::ostream &output) const
 {
-    rootField_->Print (output);
+    output << "DataObject \"" << GetUniqueName () << "\" of type \"" << GetResourceClassName () << "\"" << std::endl;
+    rootField_->Print (output, 4);
 }
 }
 }

@@ -6,7 +6,7 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-class DataClassProvider
+class BOOST_SYMBOL_EXPORT DataClassProvider
 {
 public:
     DataClassProvider ();

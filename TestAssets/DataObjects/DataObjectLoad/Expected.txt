@@ -1,0 +1,50 @@
+DataObject "TestObject" of type "CoreClass"
+    Value of type "CoreClass"
+        (simple field) 5
+        (simple field) 9.99
+        (simple field) "Hello, world!"
+        Reference to "ReferenceTarget" of type "AdditionalClass"
+        Array of size 3
+            Reference to "ReferenceOne" of type "AdditionalClass"
+            Reference to "ReferenceTwo" of type "AdditionalClass"
+            Reference to "ReferenceThree" of type "AdditionalClass"
+        Array of size 2
+            Value of type "AdditionalClass"
+                Array of size 3
+                    (simple field) 1
+                    (simple field) 2
+                    (simple field) 3
+                Array of size 3
+                    (simple field) 1.11
+                    (simple field) 2.22
+                    (simple field) 3.33
+                Array of size 3
+                    (simple field) "One"
+                    (simple field) "Two"
+                    (simple field) "Three"
+            Value of type "AdditionalClass"
+                Array of size 3
+                    (simple field) 4
+                    (simple field) 5
+                    (simple field) 6
+                Array of size 3
+                    (simple field) 4.44
+                    (simple field) 5.55
+                    (simple field) 6.66
+                Array of size 3
+                    (simple field) "Four"
+                    (simple field) "Five"
+                    (simple field) "Six"
+        Value of type "AdditionalClass"
+            Array of size 3
+                (simple field) 7
+                (simple field) 8
+                (simple field) 9
+            Array of size 3
+                (simple field) 7.77
+                (simple field) 8.88
+                (simple field) 9.99
+            Array of size 3
+                (simple field) "Seven"
+                (simple field) "Eight"
+                (simple field) "Nine"

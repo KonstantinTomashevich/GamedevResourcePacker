@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class name="AdditionalClass">
+    <field name="int_array" typeName="int" array="true" reference="false" readonly="false"/>
+    <field name="float_array" typeName="float" array="true" reference="false" readonly="false"/>
+    <field name="string_array" typeName="string" array="true" reference="false" readonly="false"/>
+</class>

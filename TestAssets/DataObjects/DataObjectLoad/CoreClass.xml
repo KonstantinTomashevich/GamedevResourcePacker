@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<class name="CoreClass">
+    <field name="simple_int" typeName="int" array="false" reference="false" readonly="false"/>
+    <field name="simple_float" typeName="float" array="false" reference="false" readonly="false"/>
+    <field name="simple_string" typeName="string" array="false" reference="false" readonly="false"/>
+    <field name="reference" typeName="AdditionalClass" array="false" reference="true" readonly="false"/>
+    <field name="reference_array" typeName="AdditionalClass" array="true" reference="true" readonly="false"/>
+    <field name="value_array" typeName="AdditionalClass" array="true" reference="false" readonly="false"/>
+    <field name="single_additional" typeName="AdditionalClass" array="false" reference="false" readonly="false"/>
+</class>

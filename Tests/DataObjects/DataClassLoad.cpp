@@ -1,14 +1,13 @@
-#define BOOST_TEST_MODULE DataClassLoading
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <Plugins/DataObjects/DataClass.hpp>
 
 using namespace GamedevResourcePacker::DataObjectsPlugin;
 
-BOOST_AUTO_TEST_CASE(DataClassLoadCorect)
+BOOST_AUTO_TEST_CASE(DataClassLoadCorrect)
 {
-    BOOST_TEST_MESSAGE ("Launching test case DataClassLoadCorect.");
     boost::unit_test::unit_test_log.set_threshold_level (boost::unit_test::log_level::log_messages);
+    BOOST_TEST_MESSAGE ("Launching test case DataClassLoadCorrect.");
     auto &masterSuite = boost::unit_test::framework::master_test_suite ();
     boost::filesystem::path xmlPath (masterSuite.argv[masterSuite.argc - 1]);
     xmlPath /= "DataClassLoad";

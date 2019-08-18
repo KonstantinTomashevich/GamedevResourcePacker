@@ -1,5 +1,5 @@
 #pragma once
-#include <Core/PluginAPI.hpp>
+#include <Shared/PluginAPI.hpp>
 #include <unordered_map>
 #include "DataClassProvider.hpp"
 

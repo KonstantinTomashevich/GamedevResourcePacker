@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <boost/dll.hpp>
 
-#include "PluginAPI.hpp"
+#include <Shared/PluginAPI.hpp>
 #include "PluginManager.hpp"
 #include "ObjectManager.hpp"
 

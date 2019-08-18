@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/container/small_vector.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
-#include "PluginAPI.hpp"
+#include <Shared/PluginAPI.hpp>
 
 #define PLUGINS_LIST_INITIAL_CAPACITY 10
 

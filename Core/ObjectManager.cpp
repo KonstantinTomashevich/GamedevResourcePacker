@@ -1,11 +1,16 @@
 #include "ObjectManager.hpp"
+#include "Exception.hpp"
+
+#include <Shared/StringHash.hpp>
 #include <boost/log/trivial.hpp>
+#include <unordered_set>
 
 namespace GamedevResourcePacker
 {
 using DirRecursiveIterator = boost::filesystem::recursive_directory_iterator;
 
 ObjectManager::ObjectManager ()
+    : resourceClassMap_ ()
 {
 
 }
@@ -71,5 +76,66 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
 
         ++iterator;
     }
+}
+
+void ObjectManager::ResolveObjectReferences ()
+{
+    BOOST_LOG_TRIVIAL (info) << "Resolving objects outer references...";
+    std::unordered_set <unsigned int> usedClassNames;
+
+    for (auto &resourceClassObjectMapPair : resourceClassMap_)
+    {
+        BOOST_LOG_TRIVIAL (info) << "Resolving outer references for objects of class \"" <<
+                                 resourceClassObjectMapPair.first << "\"...";
+        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
+
+        if (usedClassNames.count (classNameHash))
+        {
+            BOOST_THROW_EXCEPTION (Exception <ClassNameHashCollision> ("Hash " + std::to_string (classNameHash) +
+                "(for class \"" + resourceClassObjectMapPair.first + "\") already exists in set!"));
+        }
+
+        usedClassNames.insert (classNameHash);
+        std::unordered_set <unsigned int> usedObjectNames;
+        ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
+
+        for (auto &nameObjectPair : objectNameMap)
+        {
+            BOOST_LOG_TRIVIAL (info) << "Resolving outer references for object \"" << nameObjectPair.first << "\"...";
+            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+
+            if (usedObjectNames.count (objectNameHash))
+            {
+                BOOST_THROW_EXCEPTION (Exception <ObjectNameHashCollision> ("Hash " + std::to_string (objectNameHash) +
+                    "(for object \"" + resourceClassObjectMapPair.first + "\") already exists in set!"));
+            }
+
+            usedObjectNames.insert (objectNameHash);
+            Object *object = nameObjectPair.second;
+
+            for (ObjectReference *reference : object->GetOuterReferences ())
+            {
+                ResolveObjectReference (reference);
+            }
+        }
+    }
+}
+
+void ObjectManager::ResolveObjectReference (ObjectReference *reference)
+{
+    const ObjectNameMap *map = GetObjectMap (reference->GetClassName ());
+    if (map == nullptr)
+    {
+        BOOST_THROW_EXCEPTION (Exception <OuterReferenceCanNotBeResolved> ("Unable to find objects with class name \"" +
+            reference->GetClassName () + "\"!"));
+    }
+
+    if (map->count (reference->GetObjectName ()) == 0)
+    {
+        BOOST_THROW_EXCEPTION (Exception <OuterReferenceCanNotBeResolved> ("Unable to find object of class \"" +
+            reference->GetClassName () + "\" and name \"" + reference->GetObjectName () + "\"!"));
+    }
+
+    reference->Resolve (StringHash (reference->GetClassName ()), StringHash (reference->GetObjectName ()));
 }
 }

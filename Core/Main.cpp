@@ -1,13 +1,17 @@
 #include <fstream>
 #include <cstdio>
-#include <boost/dll.hpp>
 
+#include <boost/dll.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/exception/all.hpp>
 #include <Shared/PluginAPI.hpp>
+
 #include "PluginManager.hpp"
 #include "ObjectManager.hpp"
 
 #define INCORRECT_ARGS_CODE -1
 #define UNABLE_TO_LOAD_CONFIG -2
+#define PACKAGING_FATAL_ERROR -3
 
 namespace GamedevResourcePacker
 {
@@ -36,6 +40,17 @@ int Main (int argCount, char **argValues)
     ObjectManager objectManager;
     boost::filesystem::path assetsFolder (argValues[2]);
     objectManager.ScanAssetsDir (assetsFolder, &pluginManager);
+
+    try
+    {
+        objectManager.ResolveObjectReferences ();
+    }
+    catch (boost::exception &exception)
+    {
+        BOOST_LOG_TRIVIAL (fatal) << "Exception caught: " << boost::diagnostic_information (exception);
+        return PACKAGING_FATAL_ERROR;
+    }
+
 
     return 0;
 }

@@ -17,6 +17,11 @@ public:
 
     virtual ~DataObjectSimpleField () = default;
 
+    virtual void IterateOuterReferences (const ReferenceIterationCallback &callback)
+    {
+
+    }
+
     virtual void Print (std::ostream &output, int indentation = 0) const
     {
         Indent (output, indentation) << "(simple field) " << value_ << std::endl;
@@ -36,6 +41,11 @@ public:
     }
 
     virtual ~DataObjectSimpleField () = default;
+
+    virtual void IterateOuterReferences (const ReferenceIterationCallback &callback)
+    {
+
+    }
 
     virtual void Print (std::ostream &output, int indentation = 0) const
     {

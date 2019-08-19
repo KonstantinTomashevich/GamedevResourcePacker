@@ -7,10 +7,11 @@ namespace GamedevResourcePacker
 namespace DataObjectsPlugin
 {
 DataObject::DataObject (const std::string &name, const std::string &rootName, DataObject::PTree &root,
-    PluginAPI *owner, DataClassProvider *provider)
+                        PluginAPI *owner, DataClassProvider *provider)
     : Object (owner, name, rootName), rootField_ (new DataObjectValueField (provider, rootName, root))
 {
-
+    rootField_->IterateOuterReferences ([this] (ObjectReference *reference)
+                                        { AddOuterReference (reference, false); });
 }
 
 DataObject::~DataObject ()

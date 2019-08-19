@@ -14,6 +14,7 @@ public:
     DataObjectArrayField (DataClassProvider *provider, const DataClass::Field &sourceField, PTree &source);
     virtual ~DataObjectArrayField ();
 
+    virtual void IterateOuterReferences (const ReferenceIterationCallback &callback);
     virtual void Print (std::ostream &output, int indentation = 0) const;
 
     class InnerElementHasOtherType;

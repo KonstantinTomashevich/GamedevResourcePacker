@@ -36,6 +36,14 @@ DataObjectArrayField::~DataObjectArrayField ()
     }
 }
 
+void DataObjectArrayField::IterateOuterReferences (const DataObjectField::ReferenceIterationCallback &callback)
+{
+    for (DataObjectField *object : objects_)
+    {
+        object->IterateOuterReferences (callback);
+    }
+}
+
 void DataObjectArrayField::Print (std::ostream &output, int indentation) const
 {
     Indent (output, indentation) << "Array of size " << objects_.size () << std::endl;

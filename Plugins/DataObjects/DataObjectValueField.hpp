@@ -15,6 +15,7 @@ public:
     DataObjectValueField (DataClassProvider *provider, const std::string &typeName, PTree &source);
     virtual ~DataObjectValueField ();
 
+    virtual void IterateOuterReferences (const ReferenceIterationCallback &callback);
     virtual void Print (std::ostream &output, int indentation = 0) const;
 
     class TypeNotFound;

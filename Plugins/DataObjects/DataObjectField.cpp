@@ -1,4 +1,5 @@
 #include "DataObjectField.hpp"
+#include <Shared/ObjectReference.hpp>
 
 namespace GamedevResourcePacker
 {

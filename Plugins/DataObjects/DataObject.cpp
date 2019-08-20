@@ -19,6 +19,12 @@ DataObject::~DataObject ()
     delete rootField_;
 }
 
+bool DataObject::Write (FILE *output) const
+{
+    // TODO: Implement.
+    return true;
+}
+
 void DataObject::Print (std::ostream &output) const
 {
     output << "DataObject \"" << GetUniqueName () << "\" of type \"" << GetResourceClassName () << "\"" << std::endl;

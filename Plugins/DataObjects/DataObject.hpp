@@ -19,6 +19,7 @@ public:
         PluginAPI *owner, DataClassProvider *provider);
     virtual ~DataObject ();
 
+    virtual bool Write (FILE *output) const;
     void Print (std::ostream &output) const;
 
 private:

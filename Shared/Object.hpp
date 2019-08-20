@@ -2,6 +2,7 @@
 #include <boost/config.hpp>
 #include <string>
 #include <vector>
+#include <cstdio>
 #include "ObjectReference.hpp"
 
 namespace GamedevResourcePacker
@@ -16,6 +17,7 @@ public:
     const std::string &GetUniqueName () const;
     const std::string &GetResourceClassName () const;
     const std::vector <ObjectReference *> &GetOuterReferences () const;
+    virtual bool Write (FILE *output) const = 0;
 
 protected:
     Object (PluginAPI *ownerAPI, const std::string &uniqueName, const std::string &resourceClassName);

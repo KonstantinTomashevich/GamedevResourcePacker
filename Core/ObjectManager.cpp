@@ -4,6 +4,7 @@
 #include <Shared/StringHash.hpp>
 #include <boost/log/trivial.hpp>
 #include <unordered_set>
+#include <cstdio>
 
 namespace GamedevResourcePacker
 {
@@ -121,6 +122,12 @@ void ObjectManager::ResolveObjectReferences ()
     }
 }
 
+bool ObjectManager::WriteBinaries (const boost::filesystem::path &outputFolder) const
+{
+    boost::filesystem::create_directories (outputFolder);
+    return WriteContentList (outputFolder) && WriteObjects (outputFolder);
+}
+
 void ObjectManager::ResolveObjectReference (ObjectReference *reference)
 {
     const ObjectNameMap *map = GetObjectMap (reference->GetClassName ());
@@ -137,5 +144,82 @@ void ObjectManager::ResolveObjectReference (ObjectReference *reference)
     }
 
     reference->Resolve (StringHash (reference->GetClassName ()), StringHash (reference->GetObjectName ()));
+}
+
+bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolder) const
+{
+    boost::filesystem::path target = outputFolder / "content.list";
+    FILE *output = fopen (target.string ().c_str (), "wb");
+
+    if (output == nullptr)
+    {
+        BOOST_LOG_TRIVIAL (fatal) << "Unable to open " << target << " for content list output.";
+        return false;
+    }
+
+    BOOST_LOG_TRIVIAL (info) << "Generating " << target << "...";
+    size_t sizeContainer = resourceClassMap_.size ();
+    fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
+
+    for (auto &resourceClassObjectMapPair : resourceClassMap_)
+    {
+        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
+        fwrite (&classNameHash, sizeof (classNameHash), 1, output);
+
+        const ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
+        sizeContainer = objectNameMap.size ();
+        fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
+
+        for (auto &nameObjectPair : objectNameMap)
+        {
+            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+            fwrite (&objectNameHash, sizeof (objectNameHash), 1, output);
+        }
+    }
+
+    fclose (output);
+    BOOST_LOG_TRIVIAL (info) << "Done " << target << " generation.";
+    return true;
+}
+
+bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolder) const
+{
+    for (auto &resourceClassObjectMapPair : resourceClassMap_)
+    {
+        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
+        boost::filesystem::path classOutputFolder = rootOutputFolder / std::to_string (classNameHash);
+        boost::filesystem::create_directories (classOutputFolder);
+        const ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
+
+        for (auto &nameObjectPair : objectNameMap)
+        {
+            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+            const Object *object = nameObjectPair.second;
+            boost::filesystem::path target = classOutputFolder / std::to_string (objectNameHash);
+            FILE *output = fopen (target.string ().c_str (), "wb");
+
+            if (output == nullptr)
+            {
+                BOOST_LOG_TRIVIAL (fatal) << "Unable to open " << target << " for object \"" <<
+                                          object->GetUniqueName () << "\" of type \"" <<
+                                          resourceClassObjectMapPair.first << "\" binary output.";
+                return false;
+            }
+
+            BOOST_LOG_TRIVIAL (info) << "Generating " << target << "...";
+            if (!object->Write (output))
+            {
+                BOOST_LOG_TRIVIAL (fatal) << "Unable to write object \"" << object->GetUniqueName () <<
+                                          "\" of type \"" << resourceClassObjectMapPair.first <<
+                                          "\" because of internal error.";
+                return false;
+            }
+
+            fclose (output);
+            BOOST_LOG_TRIVIAL (info) << "Done " << target << " generation.";
+        }
+    }
+
+    return true;
 }
 }

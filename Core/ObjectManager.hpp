@@ -22,6 +22,9 @@ public:
     void ScanAssetsDir (const boost::filesystem::path &assetsFolder, PluginManager *pluginManager);
     /// Tries to resolve outer references for all objects, throws exception on failure.
     void ResolveObjectReferences ();
+    // TODO: Implement up-to-date cheking.
+    /// Tries to write index and assets to given output folder.
+    bool WriteBinaries (const boost::filesystem::path &outputFolder) const;
 
     // Exceptions.
     class ClassNameHashCollision;
@@ -30,6 +33,8 @@ public:
 
 private:
     void ResolveObjectReference (ObjectReference *reference);
+    bool WriteContentList (const boost::filesystem::path &outputFolder) const;
+    bool WriteObjects (const boost::filesystem::path &rootOutputFolder) const;
 
     ResourceClassMap resourceClassMap_;
 };

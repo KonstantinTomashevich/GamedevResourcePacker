@@ -12,6 +12,7 @@
 #define INCORRECT_ARGS_CODE -1
 #define UNABLE_TO_LOAD_CONFIG -2
 #define PACKAGING_FATAL_ERROR -3
+#define OUTPUT_FATAL_ERROR -4
 
 namespace GamedevResourcePacker
 {
@@ -51,6 +52,11 @@ int Main (int argCount, char **argValues)
         return PACKAGING_FATAL_ERROR;
     }
 
+    boost::filesystem::path outputFolder (argValues[3]);
+    if (!objectManager.WriteBinaries (outputFolder))
+    {
+        return OUTPUT_FATAL_ERROR;
+    }
 
     return 0;
 }

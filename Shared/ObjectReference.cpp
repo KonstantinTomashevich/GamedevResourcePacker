@@ -17,6 +17,17 @@ const std::string &ObjectReference::GetObjectName () const
 {
     return objectName_;
 }
+
+unsigned int ObjectReference::GetClassNameHash () const
+{
+    return classNameHash_;
+}
+
+unsigned int ObjectReference::GetObjectNameHash () const
+{
+    return objectNameHash_;
+}
+
 void ObjectReference::Resolve (unsigned int classNameHash, unsigned int objectNameHash)
 {
     classNameHash_ = classNameHash;

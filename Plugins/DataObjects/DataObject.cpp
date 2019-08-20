@@ -21,8 +21,7 @@ DataObject::~DataObject ()
 
 bool DataObject::Write (FILE *output) const
 {
-    // TODO: Implement.
-    return true;
+    return rootField_->Write (output);
 }
 
 void DataObject::Print (std::ostream &output) const

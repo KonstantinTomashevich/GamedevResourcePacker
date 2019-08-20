@@ -22,6 +22,12 @@ public:
 
     }
 
+    virtual bool Write (FILE *output)
+    {
+        fwrite (&value_, sizeof (value_), 1, output);
+        return true;
+    }
+
     virtual void Print (std::ostream &output, int indentation = 0) const
     {
         Indent (output, indentation) << "(simple field) " << value_ << std::endl;
@@ -45,6 +51,14 @@ public:
     virtual void IterateOuterReferences (const ReferenceIterationCallback &callback)
     {
 
+    }
+
+    virtual bool Write (FILE *output)
+    {
+        size_t size = value_.size ();
+        fwrite (&size, sizeof (size), 1, output);
+        fwrite (value_.c_str (), sizeof (char), size, output);
+        return true;
     }
 
     virtual void Print (std::ostream &output, int indentation = 0) const

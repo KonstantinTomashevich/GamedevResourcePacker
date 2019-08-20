@@ -16,6 +16,7 @@ public:
     virtual ~DataObjectValueField ();
 
     virtual void IterateOuterReferences (const ReferenceIterationCallback &callback);
+    virtual bool Write (FILE *output);
     virtual void Print (std::ostream &output, int indentation = 0) const;
 
     class TypeNotFound;

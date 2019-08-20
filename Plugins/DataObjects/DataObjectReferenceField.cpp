@@ -16,6 +16,16 @@ void DataObjectReferenceField::IterateOuterReferences (const DataObjectField::Re
     callback (&reference_);
 }
 
+bool DataObjectReferenceField::Write (FILE *output)
+{
+    unsigned int classHash = reference_.GetClassNameHash ();
+    unsigned int objectHash = reference_.GetObjectNameHash ();
+
+    fwrite (&classHash, sizeof (classHash), 1, output);
+    fwrite (&objectHash, sizeof (objectHash), 1, output);
+    return true;
+}
+
 void DataObjectReferenceField::Print (std::ostream &output, int indentation) const
 {
     Indent (output, indentation) << "Reference to \"" << reference_.GetObjectName () <<

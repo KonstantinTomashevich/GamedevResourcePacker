@@ -18,6 +18,7 @@ public:
     virtual ~DataObjectField ();
 
     virtual void IterateOuterReferences (const ReferenceIterationCallback &callback) = 0;
+    virtual bool Write (FILE *output) = 0;
     virtual void Print (std::ostream &output, int indentation = 0) const = 0;
 
 protected:

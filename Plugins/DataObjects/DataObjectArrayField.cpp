@@ -44,6 +44,23 @@ void DataObjectArrayField::IterateOuterReferences (const DataObjectField::Refere
     }
 }
 
+bool DataObjectArrayField::Write (FILE *output)
+{
+    size_t sizeContainer = objects_.size ();
+    fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
+
+    for (DataObjectField *object : objects_)
+    {
+        bool result = object->Write (output);
+        if (!result)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void DataObjectArrayField::Print (std::ostream &output, int indentation) const
 {
     Indent (output, indentation) << "Array of size " << objects_.size () << std::endl;

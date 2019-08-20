@@ -12,6 +12,8 @@ public:
 
     const std::string &GetClassName () const;
     const std::string &GetObjectName () const;
+    unsigned int GetClassNameHash () const;
+    unsigned int GetObjectNameHash () const;
     void Resolve (unsigned int classNameHash, unsigned int objectNameHash);
 
 private:

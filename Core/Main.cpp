@@ -8,6 +8,7 @@
 
 #include "PluginManager.hpp"
 #include "ObjectManager.hpp"
+#include "CodeGenerator.hpp"
 
 #define INCORRECT_ARGS_CODE -1
 #define UNABLE_TO_LOAD_CONFIG -2
@@ -18,13 +19,14 @@ namespace GamedevResourcePacker
 {
 int Main (int argCount, char **argValues)
 {
-    if (argCount != 4)
+    if (argCount != 5)
     {
         printf ("Expected arguments:\n"
                 "    Variant 1. 3 args:\n"
                 "        - plugin config folder.\n"
                 "        - assets folder.\n"
-                "        - package output folder.\n");
+                "        - package output folder.\n"
+                "        - code output folder.\n");
         return INCORRECT_ARGS_CODE;
     }
 
@@ -58,6 +60,9 @@ int Main (int argCount, char **argValues)
         return OUTPUT_FATAL_ERROR;
     }
 
+    boost::filesystem::path codeOutputFolder (argValues[4]);
+    CodeGenerator codeGenerator (&objectManager, &pluginManager);
+    codeGenerator.Generate (codeOutputFolder);
     return 0;
 }
 }

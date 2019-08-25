@@ -116,6 +116,11 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
     return nullptr;
 }
 
+void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder)
+{
+    // TODO: Implement.
+}
+
 DataClass *PluginAPI::GetClassByName (const std::string &name) const
 {
     return dataClassProvider_.GetDataClass (name);

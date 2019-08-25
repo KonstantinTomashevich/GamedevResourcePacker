@@ -15,6 +15,7 @@ public:
     virtual const char *GetName () const;
     virtual bool Load (const boost::filesystem::path &configFolder);
     virtual Object *Capture (const boost::filesystem::path &asset);
+    virtual void GenerateCode (const boost::filesystem::path &outputFolder);
 
     DataClass *GetClassByName (const std::string &name) const;
 

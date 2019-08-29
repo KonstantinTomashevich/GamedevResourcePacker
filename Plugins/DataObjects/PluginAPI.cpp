@@ -12,7 +12,7 @@ using DirIterator = boost::filesystem::directory_iterator;
 
 const char *PluginAPI::GetName () const
 {
-    return "Data Objects";
+    return "DataObjects";
 }
 
 bool PluginAPI::Load (const Path &configFolder)

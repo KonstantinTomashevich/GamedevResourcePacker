@@ -14,6 +14,8 @@ public:
     void Generate (const boost::filesystem::path &outputFolder) const;
 
 private:
+    void CopyBundleIndependentCode (const boost::filesystem::path &outputFolder) const;
+
     ObjectManager *objectManager_;
     PluginManager *pluginManager_;
 };

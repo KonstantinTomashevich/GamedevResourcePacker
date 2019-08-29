@@ -116,14 +116,25 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
     return nullptr;
 }
 
-void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder)
+void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder) const
 {
-    // TODO: Implement.
+    boost::filesystem::path classesFolder = outputFolder / GetName ();
+    for (const auto &nameClassPair : dataClassProvider_.GetDataClasses ())
+    {
+        nameClassPair.second->GenerateCode (classesFolder);
+    }
+
+    GenerateLoadersCode (outputFolder);
 }
 
 DataClass *PluginAPI::GetClassByName (const std::string &name) const
 {
     return dataClassProvider_.GetDataClass (name);
+}
+
+void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder) const
+{
+    // TODO: Implement.
 }
 }
 }

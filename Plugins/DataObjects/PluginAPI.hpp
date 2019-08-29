@@ -15,11 +15,13 @@ public:
     virtual const char *GetName () const;
     virtual bool Load (const boost::filesystem::path &configFolder);
     virtual Object *Capture (const boost::filesystem::path &asset);
-    virtual void GenerateCode (const boost::filesystem::path &outputFolder);
 
+    virtual void GenerateCode (const boost::filesystem::path &outputFolder) const;
     DataClass *GetClassByName (const std::string &name) const;
 
 private:
+    void GenerateLoadersCode (const boost::filesystem::path &outputFolder) const;
+
     DataClassProvider dataClassProvider_;
 };
 }

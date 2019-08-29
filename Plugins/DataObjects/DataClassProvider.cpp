@@ -39,5 +39,10 @@ DataClass *DataClassProvider::GetDataClass (const std::string &name) const
         return nullptr;
     }
 }
+
+const std::unordered_map <std::string, DataClass *> &DataClassProvider::GetDataClasses () const
+{
+    return dataClasses_;
+}
 }
 }

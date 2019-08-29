@@ -15,6 +15,6 @@ public:
     /// Offers plugin to capture asset represented by given path.
     /// Returns object that represents given asset or nullptr if plugin rejects to capture asset.
     virtual Object *Capture (const boost::filesystem::path &asset) = 0;
-    virtual void GenerateCode (const boost::filesystem::path &outputFolder) = 0;
+    virtual void GenerateCode (const boost::filesystem::path &outputFolder) const = 0;
 };
 }

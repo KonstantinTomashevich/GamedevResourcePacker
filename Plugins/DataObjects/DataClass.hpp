@@ -30,6 +30,7 @@ public:
 
     const std::string &GetName () const;
     const FieldVector &GetFields () const;
+    void GenerateCode (const boost::filesystem::path &outputFolder) const;
 
     class XMLParseException;
 

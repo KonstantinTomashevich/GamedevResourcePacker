@@ -32,6 +32,11 @@ const DataClass::FieldVector &DataClass::GetFields () const
     return fields_;
 }
 
+void DataClass::GenerateCode (const boost::filesystem::path &outputFolder) const
+{
+    // TODO: Implement.
+}
+
 void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
 {
     try

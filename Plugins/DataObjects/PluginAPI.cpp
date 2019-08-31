@@ -134,7 +134,41 @@ DataClass *PluginAPI::GetClassByName (const std::string &name) const
 
 void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder) const
 {
-    // TODO: Implement.
+    boost::filesystem::path loadersPath = outputFolder / (GetName () + std::string ("Loaders.hpp"));
+    BOOST_LOG_TRIVIAL (info) << "Generation " << loadersPath << "...";
+    std::ofstream loaders (loadersPath.string ());
+
+    loaders << "#pragma once" << std::endl <<
+            "#include <cstdio>" << std::endl <<
+            "#include <boost/filesystem.hpp" << std::endl << std::endl <<
+            "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
+            "template <typename T> Object *DataObjectLoader (const boost::filesystem::path &path)" << std::endl <<
+            "{" << std::endl <<
+            "    FILE *input = fopen (path.string ().c_str (), \"rb\");" << std::endl <<
+            "    fseek (input, 0, SEEK_END);" << std::endl <<
+            // Data objects are usually small (they are not superbig locations, packed into one file).
+            // So we can just read full data object into buffer.
+            "    size_t size = ftell (input);" << std::endl <<
+            "    rewind (input);" << std::endl << std::endl <<
+            "    char *buffer = (char *) malloc (size + 1);" << std::endl <<
+            "    fread (buffer, size, 1, input);" << std::endl <<
+            "    T *object = new T (size, buffer);" << std::endl << std::endl <<
+            "    free (buffer);" << std::endl <<
+            "    fclose (input);" << std::endl <<
+            "    return object;" << std::endl <<
+            "}" << std::endl << std::endl;
+
+    for (auto &nameDataClass : dataClassProvider_.GetDataClasses ())
+    {
+        loaders << "template <> Loader getLoader <" << nameDataClass.first << "> ()" << std::endl <<
+                "{" << std::endl <<
+                "    return DataObjectLoader <" << nameDataClass.first << ">;" << std::endl <<
+                "}" << std::endl << std::endl;
+    }
+
+    loaders << "}" << std::endl;
+    loaders.close ();
+    BOOST_LOG_TRIVIAL (info) << "Done " << loadersPath << " generation.";
 }
 }
 }

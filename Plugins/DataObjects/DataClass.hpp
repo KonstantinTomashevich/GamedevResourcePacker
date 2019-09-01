@@ -36,6 +36,20 @@ public:
 
 private:
     void LoadFromTree (boost::property_tree::ptree &tree);
+    std::string GenerateCxxFieldType (const Field &field) const;
+    bool IsSimpleField (const Field &field) const;
+    bool IsRawPointerField (const Field &field) const;
+
+    std::string GenerateCapitalizedFieldName (const Field &field) const;
+    std::string GenerateConstGetterCxxType (const Field &field) const;
+    std::string GenerateReferenceGetterCxxType (const Field &field) const;
+    std::string GenerateSetterCxxType (const Field &field) const;
+
+    void GenerateHeader (const boost::filesystem::path &outputFolder) const;
+    void GenerateHeaderAccessors (std::ofstream &header) const;
+    void GenerateHeaderFields (std::ofstream &header) const;
+
+    void GenerateObject (const boost::filesystem::path &outputFolder) const;
 
     std::string name_;
     FieldVector fields_;

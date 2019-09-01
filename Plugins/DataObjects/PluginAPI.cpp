@@ -119,6 +119,8 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder) const
 {
     boost::filesystem::path classesFolder = outputFolder / GetName ();
+    boost::filesystem::create_directories (classesFolder);
+
     for (const auto &nameClassPair : dataClassProvider_.GetDataClasses ())
     {
         nameClassPair.second->GenerateCode (classesFolder);
@@ -135,17 +137,18 @@ DataClass *PluginAPI::GetClassByName (const std::string &name) const
 void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder) const
 {
     boost::filesystem::path loadersPath = outputFolder / (GetName () + std::string ("Loaders.hpp"));
-    BOOST_LOG_TRIVIAL (info) << "Generation " << loadersPath << "...";
+    BOOST_LOG_TRIVIAL (info) << "Generating  " << loadersPath << "...";
     std::ofstream loaders (loadersPath.string ());
 
     loaders << "#pragma once" << std::endl <<
             "#include <cstdio>" << std::endl <<
             "#include <boost/filesystem.hpp" << std::endl << std::endl <<
             "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
-            "template <typename T> Object *DataObjectLoader (const boost::filesystem::path &path)" << std::endl <<
+            "template <typename T> Object *DataObjectLoader ("
+            "int id, const boost::filesystem::path &path)" << std::endl <<
             "{" << std::endl <<
             "    FILE *input = fopen (path.string ().c_str (), \"rb\");" << std::endl <<
-            "    T *object = new T (input);" << std::endl <<
+            "    T *object = new T (id, input);" << std::endl <<
             "    fclose (input);" << std::endl <<
             "    return object;" << std::endl <<
             "}" << std::endl << std::endl;

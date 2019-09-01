@@ -87,7 +87,7 @@ Object *GetResource (const Loader &loader, unsigned int group, unsigned int id)
             BOOST_THROW_EXCEPTION (Exception <ObjectNotExists> ("Object " + std::to_string (id) + "not found!"));
         }
 
-        object = loader (loadPathInfo->second);
+        object = loader (id, loadPathInfo->second);
         if (object == nullptr)
         {
             BOOST_THROW_EXCEPTION (Exception <LoadedObjectIsNull> ("Loaded object is null!"));

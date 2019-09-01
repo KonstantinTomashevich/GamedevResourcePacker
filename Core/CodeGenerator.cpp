@@ -15,12 +15,12 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
     CopyBundleIndependentCode (outputFolder);
 
     boost::filesystem::path loaderUmbrellaPath = outputFolder / "Loaders.hpp";
-    BOOST_LOG_TRIVIAL (info) << "Generation " << loaderUmbrellaPath << "...";
+    BOOST_LOG_TRIVIAL (info) << "Generating  " << loaderUmbrellaPath << "...";
     std::ofstream loaderUmbrella (loaderUmbrellaPath.string ());
     loaderUmbrella << "#pragma once" << std::endl <<
                    "#include <boost/filesystem.hpp" << std::endl << std::endl <<
                    "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
-                   "using Loader = std::function <Object * (const boost::filesystem::path &)>;" << std::endl <<
+                   "using Loader = std::function <Object * (int id, const boost::filesystem::path &)>;" << std::endl <<
                    "template <typename T> Loader GetLoader ()" << std::endl << "{" << std::endl <<
                    "    return nullptr;" << std::endl << "}" << std::endl << "}" << std::endl << std::endl;
 

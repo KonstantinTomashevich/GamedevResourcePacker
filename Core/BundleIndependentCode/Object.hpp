@@ -14,7 +14,6 @@ public:
     RuntimeGroup *GetGroup () const noexcept;
     void SetGroup (RuntimeGroup *group) noexcept;
 
-    virtual void Load (const boost::filesystem::path &path) = 0;
     int GetRefCount () const noexcept;
     void Ref () noexcept;
     void Unref () noexcept;

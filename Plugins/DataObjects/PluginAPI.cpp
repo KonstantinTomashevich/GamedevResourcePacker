@@ -145,22 +145,14 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder
             "template <typename T> Object *DataObjectLoader (const boost::filesystem::path &path)" << std::endl <<
             "{" << std::endl <<
             "    FILE *input = fopen (path.string ().c_str (), \"rb\");" << std::endl <<
-            "    fseek (input, 0, SEEK_END);" << std::endl <<
-            // Data objects are usually small (they are not superbig locations, packed into one file).
-            // So we can just read full data object into buffer.
-            "    size_t size = ftell (input);" << std::endl <<
-            "    rewind (input);" << std::endl << std::endl <<
-            "    char *buffer = (char *) malloc (size + 1);" << std::endl <<
-            "    fread (buffer, size, 1, input);" << std::endl <<
-            "    T *object = new T (size, buffer);" << std::endl << std::endl <<
-            "    free (buffer);" << std::endl <<
+            "    T *object = new T (input);" << std::endl <<
             "    fclose (input);" << std::endl <<
             "    return object;" << std::endl <<
             "}" << std::endl << std::endl;
 
     for (auto &nameDataClass : dataClassProvider_.GetDataClasses ())
     {
-        loaders << "template <> Loader getLoader <" << nameDataClass.first << "> ()" << std::endl <<
+        loaders << "template <> Loader GetLoader <" << nameDataClass.first << "> ()" << std::endl <<
                 "{" << std::endl <<
                 "    return DataObjectLoader <" << nameDataClass.first << ">;" << std::endl <<
                 "}" << std::endl << std::endl;

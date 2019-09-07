@@ -79,9 +79,10 @@ void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &outputFold
 
     for (auto &classNameObjectsPair : objectManager_->GetResourceClassMap ())
     {
-        idsHeader << "namespace " << classNameObjectsPair.first << std::endl <<
-                  "{" << std::endl <<
-                  "unsigned int groupId = " << StringHash (classNameObjectsPair.first) << ";" << std::endl;
+        idsHeader << "unsigned int " << classNameObjectsPair.first << "GroupId = " <<
+                  StringHash (classNameObjectsPair.first) << ";" << std::endl <<
+                  "namespace " << classNameObjectsPair.first << std::endl <<
+                  "{" << std::endl;
 
         for (auto &objectNameInstancePair : classNameObjectsPair.second)
         {

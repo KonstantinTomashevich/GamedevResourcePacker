@@ -1,5 +1,6 @@
 #include "CodeGenerator.hpp"
 #include <boost/log/trivial.hpp>
+#include <Shared/StringHash.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -32,6 +33,7 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
 
     loaderUmbrella.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << loaderUmbrellaPath << " generation.";
+    GenerateIdsHeader (outputFolder);
 }
 
 void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &outputFolder) const
@@ -61,5 +63,37 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
 
         ++iterator;
     }
+}
+
+void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &outputFolder) const
+{
+    boost::filesystem::path idsHeaderPath = outputFolder / "Ids.hpp";
+    BOOST_LOG_TRIVIAL (info) << "Generating  " << idsHeaderPath << "...";
+    std::ofstream idsHeader (idsHeaderPath.string ());
+
+    idsHeader << "#pragma once" << std::endl <<
+              "namespace ResourceSubsystem" << std::endl <<
+              "{" << std::endl <<
+              "namespace Ids" << std::endl <<
+              "{" << std::endl << std::endl;
+
+    for (auto &classNameObjectsPair : objectManager_->GetResourceClassMap ())
+    {
+        idsHeader << "namespace " << classNameObjectsPair.first << std::endl <<
+                  "{" << std::endl <<
+                  "unsigned int groupId = " << StringHash (classNameObjectsPair.first) << ";" << std::endl;
+
+        for (auto &objectNameInstancePair : classNameObjectsPair.second)
+        {
+            idsHeader << "unsigned int " << objectNameInstancePair.first << " = " <<
+                      StringHash (objectNameInstancePair.first) << ";" << std::endl;
+        }
+
+        idsHeader << "}" << std::endl << std::endl;
+    }
+
+
+    idsHeader << "}" << std::endl << "}" << std::endl;
+    BOOST_LOG_TRIVIAL (info) << "Done " << idsHeaderPath << " generation.";
 }
 }

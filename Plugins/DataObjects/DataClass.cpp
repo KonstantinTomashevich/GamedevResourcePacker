@@ -163,6 +163,8 @@ void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) con
            "#include <Object.hpp>" << std::endl << std::endl <<
            "namespace ResourceSubsystem" << std::endl <<
            "{" << std::endl <<
+           "namespace DataObjects" << std::endl <<
+           "{" << std::endl <<
            "class " << name_ << " : public Object" << std::endl <<
            "{" << std::endl <<
            "public:" << std::endl <<
@@ -171,7 +173,7 @@ void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) con
 
     GenerateHeaderAccessors (header);
     GenerateHeaderFields (header);
-    header << "};" << std::endl << "}" << std::endl;
+    header << "};" << std::endl << "}" << std::endl << "}" << std::endl;
 
     header.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << headerPath << " generation.";
@@ -188,11 +190,11 @@ void DataClass::GenerateHeaderAccessors (std::ofstream &header) const
 
         if (!field.readonly)
         {
-            header << "    " << GenerateReferenceGetterCxxType (field) << " Get" << capitalizedName << " ()"
+            header << "    " << GenerateReferenceGetterCxxType (field) << " Get" << capitalizedName << " ();"
                    << std::endl;
 
             header << "    void Set" << capitalizedName << " (" << GenerateSetterCxxType (field) << " " <<
-                   capitalizedName << ");" << std::endl;
+                   field.name << ");" << std::endl;
         }
 
         header << std::endl;
@@ -214,8 +216,149 @@ void DataClass::GenerateObject (const boost::filesystem::path &outputFolder) con
     BOOST_LOG_TRIVIAL (info) << "Generating  " << objectPath << "...";
     std::ofstream object (objectPath.string ());
 
+    object << "#include \"" << name_ << ".hpp\"" << std::endl <<
+           "#include <Core.hpp>" << std::endl <<
+           "#include <utility>" << std::endl << std::endl <<
+           "namespace ResourceSubsystem" << std::endl <<
+           "{" << std::endl <<
+           "namespace DataObjects" << std::endl <<
+           "{" << std::endl << std::endl;
+
+    GenerateObjectConstructor (object);
+    GenerateObjectDestructor (object);
+    GenerateObjectAccessors (object);
+
+    object << "}" << std::endl << "}" << std::endl;
     object.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << objectPath << " generation.";
+}
+
+void DataClass::GenerateObjectAccessors (std::ofstream &object) const
+{
+    for (auto &field : fields_)
+    {
+        std::string capitalizedName = GenerateCapitalizedFieldName (field);
+        object << GenerateConstGetterCxxType (field) << " " << name_ << "::Get" << capitalizedName <<
+               " () const" << std::endl << "{" << std::endl << "    return " << field.name << "_;" <<
+               std::endl << "}" << std::endl << std::endl;
+
+        if (!field.readonly)
+        {
+            object << GenerateReferenceGetterCxxType (field) << " " << name_ << "::Get" <<
+                   capitalizedName << " ()" << std::endl << "{" << std::endl << "    return " <<
+                   field.name << "_;" << std::endl << "}" << std::endl << std::endl;
+
+            object << "void " << name_ << "::Set" << capitalizedName << " (" << GenerateSetterCxxType (field) << " " <<
+                   field.name << ")" << std::endl << "{" << std::endl << "    " << field.name << "_ = " <<
+                   field.name << ";" << std::endl << "}" << std::endl << std::endl;
+        }
+    }
+}
+
+void DataClass::GenerateObjectConstructor (std::ofstream &object) const
+{
+    object << name_ << "::~" << name_ << " (int id, FILE *stream)" << std::endl <<
+           "    : Object (id)";
+
+    for (auto &field : fields_)
+    {
+        if (field.array)
+        {
+            object << "," << std::endl << "      " << field.name << "_ ()";
+        }
+    }
+
+    object << std::endl << "{" << std::endl;
+
+    for (auto &field : fields_)
+    {
+        if (field.array)
+        {
+            InsertArrayReader (object, field);
+        }
+        else
+        {
+            InsertValueReader (object, field, "    ");
+        }
+    }
+
+    object << "}" << std::endl << std::endl;
+}
+
+void DataClass::GenerateObjectDestructor (std::ofstream &object) const
+{
+    object << name_ << "::~" << name_ << " ()" << std::endl << "{" << std::endl;
+    for (auto &field : fields_)
+    {
+        if (!field.reference)
+        {
+            continue;
+        }
+
+        if (field.array)
+        {
+            object << std::endl << "for (auto &object : " << field.name << "_)" << std::endl <<
+                   "{" << std::endl << "    object->Unref ();" << std::endl << "}" << std::endl << std::endl;
+        }
+        else
+        {
+            object << "    " << field.name << "_->Unref ();" << std::endl;
+        }
+    }
+
+    object << "}" << std::endl << std::endl;
+}
+
+void DataClass::InsertArrayReader (std::ofstream &object, const DataClass::Field &field) const
+{
+    object << "    int " << field.name << "Count;" << std::endl <<
+           "    fread (&" << field.name << "Count, sizeof (" << field.name << "Count), 1, stream);" << std::endl <<
+           "    " << field.name << "_.resize (" << field.name << "Count);" << std::endl << std::endl <<
+           "    for (int index = 0; index < " << field.name << "Count; ++index)" << std::endl <<
+           "    {" << std::endl;
+
+    InsertValueReader (object, field, "        ");
+    object << "    }" << std::endl << std::endl;
+}
+
+void DataClass::InsertValueReader (std::ofstream &object,
+                                   const DataClass::Field &field,
+                                   const std::string &indentation) const
+{
+    std::string outputName = (field.array ? field.name + "[index]" : field.name) + "_";
+    if (field.typeName == "string")
+    {
+        object << indentation << "int " << field.name << "Size;" << std::endl <<
+               indentation << "fread (&" << field.name << "Size, sizeof (" << field.name << "Size), 1, stream);" <<
+               std::endl << indentation << outputName << ".resize (" << field.name << "Size);" << std::endl <<
+               indentation << "fread (&" << outputName << "[0], sizeof (" << field.name << "Size), 1, stream);" <<
+               std::endl;
+    }
+    else if (IsSimpleField (field))
+    {
+        object << indentation << "fread (&" << outputName << ", sizeof (" <<
+               outputName << "), 1, stream);" << std::endl;
+    }
+    else if (field.reference)
+    {
+        object << indentation << "unsigned int " << field.name << "GroupId;" << std::endl <<
+               indentation << "unsigned int " << field.name << "ObjectId;" << std::endl << std::endl <<
+               indentation << "fread (&" << field.name << "GroupId, sizeof (" << field.name << "GroupId, 1, stream);"
+               << std::endl << indentation << "fread (&" << field.name << "ObjectId, sizeof (" << field.name <<
+               "ObjectId, 1, stream);" << std::endl <<
+               indentation << outputName << " = GetResource <" << field.typeName << "> (" <<
+               field.name << "GroupId, " << field.name << "ObjectId);" << std::endl;
+    }
+    else
+    {
+        object << indentation << outputName << " = std::move (" << field.typeName <<
+               "(Object::PRIVATE_OBJECT_ID, stream));" << std::endl;
+    }
+
+    if (!field.array)
+    {
+        object << std::endl;
+    }
 }
 }
 }

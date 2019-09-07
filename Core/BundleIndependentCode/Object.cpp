@@ -33,7 +33,7 @@ void Object::Ref () noexcept
 {
     if (refCount_ < UINT_MAX)
     {
-        if (++refCount_ == 1)
+        if (++refCount_ == 1 && group_ != nullptr)
         {
             group_->UseObject (this);
         }
@@ -44,7 +44,7 @@ void Object::Unref () noexcept
 {
     if (refCount_ > 0)
     {
-        if (--refCount_ == 0)
+        if (--refCount_ == 0 && group_ != nullptr)
         {
             group_->UnuseObject (this);
         }

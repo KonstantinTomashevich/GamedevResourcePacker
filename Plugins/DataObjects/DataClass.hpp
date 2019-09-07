@@ -50,6 +50,12 @@ private:
     void GenerateHeaderFields (std::ofstream &header) const;
 
     void GenerateObject (const boost::filesystem::path &outputFolder) const;
+    void GenerateObjectAccessors (std::ofstream &object) const;
+    void GenerateObjectConstructor (std::ofstream &object) const;
+    void GenerateObjectDestructor (std::ofstream &object) const;
+
+    void InsertArrayReader (std::ofstream &object, const Field &field) const;
+    void InsertValueReader (std::ofstream &object, const Field &field, const std::string &indentation) const;
 
     std::string name_;
     FieldVector fields_;

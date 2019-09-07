@@ -8,7 +8,7 @@ namespace ResourceSubsystem
 {
 void Init (const boost::filesystem::path &assetFolder);
 Object *GetResource (const Loader &loader, unsigned int group, unsigned int id);
-template <typename T> T *GetResources (unsigned int group, unsigned int id)
+template <typename T> T *GetResource (unsigned int group, unsigned int id)
 {
     return (T *) GetResource (GetLoader <T> (), group, id);
 }

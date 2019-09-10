@@ -33,7 +33,9 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
 
     loaderUmbrella.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << loaderUmbrellaPath << " generation.";
+
     GenerateIdsHeader (outputFolder);
+    GenerateDefinesHeader (outputFolder);
 }
 
 void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &outputFolder) const
@@ -96,5 +98,28 @@ void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &outputFold
 
     idsHeader << "}" << std::endl << "}" << std::endl;
     BOOST_LOG_TRIVIAL (info) << "Done " << idsHeaderPath << " generation.";
+}
+
+void CodeGenerator::GenerateDefinesHeader (const boost::filesystem::path &outputFolder) const
+{
+    boost::filesystem::path definesHeaderPath = outputFolder / "Defines.hpp";
+    BOOST_LOG_TRIVIAL (info) << "Generating  " << definesHeaderPath << "...";
+    std::ofstream definesHeader (definesHeaderPath.string ());
+    definesHeader << "#pragma once" << std::endl << std::endl;
+
+    for (auto &plugin : pluginManager_->GetPluginsVector ())
+    {
+        std::vector <std::string> pluginDefines = plugin->GenerateDefines ();
+        definesHeader << "// " << plugin->GetName () << std::endl;
+
+        for (auto &define : pluginDefines)
+        {
+            definesHeader << "#define " << define << std::endl;
+        }
+
+        definesHeader << std::endl;
+    }
+
+    BOOST_LOG_TRIVIAL (info) << "Done " << definesHeaderPath << " generation.";
 }
 }

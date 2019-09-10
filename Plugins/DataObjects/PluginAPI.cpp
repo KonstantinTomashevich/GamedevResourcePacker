@@ -129,6 +129,18 @@ void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder) const
     GenerateLoadersCode (outputFolder);
 }
 
+std::vector <std::string> PluginAPI::GenerateDefines () const
+{
+    std::vector <std::string> result;
+    for (const auto &nameClassPair : dataClassProvider_.GetDataClasses ())
+    {
+        result.emplace_back ("object_class_header_" + nameClassPair.first + " <" + GetName () +
+            "/" + nameClassPair.first + ".hpp>");
+    }
+
+    return result;
+}
+
 DataClass *PluginAPI::GetClassByName (const std::string &name) const
 {
     return dataClassProvider_.GetDataClass (name);

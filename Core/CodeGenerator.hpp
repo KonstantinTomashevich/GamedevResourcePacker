@@ -16,6 +16,7 @@ public:
 private:
     void CopyBundleIndependentCode (const boost::filesystem::path &outputFolder) const;
     void GenerateIdsHeader (const boost::filesystem::path &outputFolder) const;
+    void GenerateDefinesHeader (const boost::filesystem::path &outputFolder) const;
 
     ObjectManager *objectManager_;
     PluginManager *pluginManager_;

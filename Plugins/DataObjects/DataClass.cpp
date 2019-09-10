@@ -157,7 +157,7 @@ void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) con
     std::ofstream header (headerPath.string ());
 
     header << "#pragma once" << std::endl <<
-           "#include <csstdio>" << std::endl <<
+           "#include <cstdio>" << std::endl <<
            "#include <vector>" << std::endl <<
            "#include <string>" << std::endl <<
            "#include <Object.hpp>" << std::endl << std::endl <<

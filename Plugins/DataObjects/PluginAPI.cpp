@@ -142,8 +142,15 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder
 
     loaders << "#pragma once" << std::endl <<
             "#include <cstdio>" << std::endl <<
-            "#include <boost/filesystem.hpp" << std::endl << std::endl <<
-            "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
+            "#include <boost/filesystem.hpp>" << std::endl;
+
+    for (auto &nameDataClass : dataClassProvider_.GetDataClasses ())
+    {
+        loaders << "#include \"" << GetName () << "/" << nameDataClass.first << ".hpp\"" << std::endl;
+    }
+
+    loaders << std::endl << "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
+            "namespace DataObjects" << std::endl << "{" << std::endl <<
             "template <typename T> Object *DataObjectLoader ("
             "int id, const boost::filesystem::path &path)" << std::endl <<
             "{" << std::endl <<
@@ -161,7 +168,7 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder
                 "}" << std::endl << std::endl;
     }
 
-    loaders << "}" << std::endl;
+    loaders << "}" << std::endl << "}" << std::endl;
     loaders.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << loadersPath << " generation.";
 }

@@ -69,7 +69,7 @@ void Init (const boost::filesystem::path &assetFolder)
     fclose (contentList);
 }
 
-Object *GetResource (const Loader &loader, unsigned int group, unsigned int id)
+Object *GetResource (Loader loader, unsigned int group, unsigned int id)
 {
     try
     {

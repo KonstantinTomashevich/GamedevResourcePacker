@@ -1,17 +1,13 @@
 #pragma once
 #include "Object.hpp"
 #include "RuntimeGroup.hpp"
-#include "Loaders.hpp"
 #include <functional>
 
 namespace ResourceSubsystem
 {
+typedef Object *(*Loader) (int id, const boost::filesystem::path &);
 void Init (const boost::filesystem::path &assetFolder);
-Object *GetResource (const Loader &loader, unsigned int group, unsigned int id);
-template <typename T> T *GetResource (unsigned int group, unsigned int id)
-{
-    return (T *) GetResource (GetLoader <T> (), group, id);
-}
+Object *GetResource (Loader loader, unsigned int group, unsigned int id);
 
 RuntimeGroup *GetRuntimeGroup (unsigned int group) noexcept;
 void DisposeAllUnused () noexcept;

@@ -8,7 +8,7 @@ class Object
 {
 public:
     /// All private objects will have that id.
-    const int PRIVATE_OBJECT_ID = 0;
+    const static int PRIVATE_OBJECT_ID = 0;
 
     Object (int id) noexcept;
     virtual ~Object () = default;

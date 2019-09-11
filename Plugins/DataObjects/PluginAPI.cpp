@@ -136,30 +136,26 @@ std::vector <std::string> PluginAPI::GenerateDefines () const
     {
         result.emplace_back ("object_class_header_" + nameClassPair.first + " <" + GetName () +
             "/" + nameClassPair.first + ".hpp>");
+
+        result.emplace_back ("object_class_forward_" + nameClassPair.first + " namespace DataObjects { class "
+                                 + nameClassPair.first + "; }");
+
+        result.emplace_back ("object_class_loader_" + nameClassPair.first + " DataObjects::DataObjectLoader <"
+                                 + nameClassPair.first + ">");
     }
 
     return result;
 }
 
-DataClass *PluginAPI::GetClassByName (const std::string &name) const
-{
-    return dataClassProvider_.GetDataClass (name);
-}
-
 void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder) const
 {
-    boost::filesystem::path loadersPath = outputFolder / (GetName () + std::string ("Loaders.hpp"));
+    boost::filesystem::path loadersPath = outputFolder / GetName () / std::string ("Loader.hpp");
     BOOST_LOG_TRIVIAL (info) << "Generating  " << loadersPath << "...";
     std::ofstream loaders (loadersPath.string ());
 
     loaders << "#pragma once" << std::endl <<
             "#include <cstdio>" << std::endl <<
             "#include <boost/filesystem.hpp>" << std::endl;
-
-    for (auto &nameDataClass : dataClassProvider_.GetDataClasses ())
-    {
-        loaders << "#include \"" << GetName () << "/" << nameDataClass.first << ".hpp\"" << std::endl;
-    }
 
     loaders << std::endl << "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
             "namespace DataObjects" << std::endl << "{" << std::endl <<
@@ -170,17 +166,8 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder
             "    T *object = new T (id, input);" << std::endl <<
             "    fclose (input);" << std::endl <<
             "    return object;" << std::endl <<
-            "}" << std::endl << std::endl;
+            "}" << std::endl << "}" << std::endl << "}" << std::endl;
 
-    for (auto &nameDataClass : dataClassProvider_.GetDataClasses ())
-    {
-        loaders << "template <> Loader GetLoader <" << nameDataClass.first << "> ()" << std::endl <<
-                "{" << std::endl <<
-                "    return DataObjectLoader <" << nameDataClass.first << ">;" << std::endl <<
-                "}" << std::endl << std::endl;
-    }
-
-    loaders << "}" << std::endl << "}" << std::endl;
     loaders.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << loadersPath << " generation.";
 }

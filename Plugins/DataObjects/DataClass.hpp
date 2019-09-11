@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <unordered_set>
 #include <boost/container/small_vector.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/exception/all.hpp>
@@ -37,6 +38,7 @@ public:
 private:
     void LoadFromTree (boost::property_tree::ptree &tree);
     std::string GenerateCxxFieldType (const Field &field) const;
+    bool IsSimpleFieldType (const Field &field) const;
     bool IsSimpleField (const Field &field) const;
     bool IsRawPointerField (const Field &field) const;
 
@@ -47,9 +49,12 @@ private:
 
     void GenerateHeader (const boost::filesystem::path &outputFolder) const;
     void GenerateHeaderAccessors (std::ofstream &header) const;
+    void GenerateHeaderIncludes (std::ofstream &header) const;
+    void GenerateHeaderForwardDeclarations (std::ofstream &header) const;
     void GenerateHeaderFields (std::ofstream &header) const;
 
     void GenerateObject (const boost::filesystem::path &outputFolder) const;
+    void GenerateObjectIncludes (std::ofstream &object) const;
     void GenerateObjectAccessors (std::ofstream &object) const;
     void GenerateObjectConstructor (std::ofstream &object) const;
     void GenerateObjectDestructor (std::ofstream &object) const;

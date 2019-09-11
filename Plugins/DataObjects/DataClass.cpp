@@ -43,15 +43,15 @@ void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
 {
     try
     {
-        name_ = tree.get_child ("class.<xmlattr>.name").data ().c_str ();
+        name_ = tree.get_child ("class.<xmlattr>.name").data ();
         for (PTree::value_type &node : tree.get_child ("class"))
         {
             if (node.first == "field")
             {
                 Field field;
                 PTree attr = node.second.get_child ("<xmlattr>");
-                field.name = attr.get_child ("name").data ().c_str ();
-                field.typeName = attr.get_child ("typeName").data ().c_str ();
+                field.name = attr.get_child ("name").data ();
+                field.typeName = attr.get_child ("typeName").data ();
 
                 field.array = attr.get_child ("array").data () == "true";
                 field.reference = attr.get_child ("reference").data () == "true";
@@ -97,9 +97,14 @@ std::string DataClass::GenerateCxxFieldType (const DataClass::Field &field) cons
     return result;
 }
 
+bool DataClass::IsSimpleFieldType (const DataClass::Field &field) const
+{
+    return field.typeName == "int" || field.typeName == "float";
+}
+
 bool DataClass::IsSimpleField (const DataClass::Field &field) const
 {
-    return !field.array && (field.typeName == "int" || field.typeName == "float");
+    return !field.array && IsSimpleFieldType (field);
 }
 
 bool DataClass::IsRawPointerField (const DataClass::Field &field) const
@@ -160,14 +165,21 @@ void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) con
            "#include <cstdio>" << std::endl <<
            "#include <vector>" << std::endl <<
            "#include <string>" << std::endl <<
-           "#include <Object.hpp>" << std::endl << std::endl <<
-           "namespace ResourceSubsystem" << std::endl <<
-           "{" << std::endl <<
-           "namespace DataObjects" << std::endl <<
+           "#include <Object.hpp>" << std::endl <<
+           "#include <Defines.hpp>" << std::endl << std::endl;
+
+    GenerateHeaderIncludes (header);
+    header << "namespace ResourceSubsystem" << std::endl <<
+           "{" << std::endl;
+
+    GenerateHeaderForwardDeclarations (header);
+    header << "namespace DataObjects" << std::endl <<
            "{" << std::endl <<
            "class " << name_ << " : public Object" << std::endl <<
            "{" << std::endl <<
            "public:" << std::endl <<
+           "    /// Stub constructor for std::vector, do not use!" << std::endl <<
+           "    " << name_ << "() : Object (PRIVATE_OBJECT_ID) {}" << std::endl <<
            "    " << name_ << " (int id, FILE *stream);" << std::endl <<
            "    virtual ~" << name_ << " ();" << std::endl << std::endl;
 
@@ -201,6 +213,38 @@ void DataClass::GenerateHeaderAccessors (std::ofstream &header) const
     }
 }
 
+void DataClass::GenerateHeaderIncludes (std::ofstream &header) const
+{
+    std::unordered_set <std::string> alreadyIncluded = {"string"};
+    header << "#include \"Loader.hpp\"" << std::endl;
+
+    for (auto &field : fields_)
+    {
+        if (!field.reference && !IsSimpleFieldType (field) && alreadyIncluded.count (field.typeName) == 0)
+        {
+            header << "#include object_class_header_" << field.typeName << std::endl;
+            alreadyIncluded.insert (field.typeName);
+        }
+    }
+
+    header << std::endl;
+}
+
+void DataClass::GenerateHeaderForwardDeclarations (std::ofstream &header) const
+{
+    std::unordered_set <std::string> alreadyDeclared;
+    for (auto &field : fields_)
+    {
+        if (field.reference && alreadyDeclared.count (field.typeName) == 0)
+        {
+            header << "object_class_forward_" << field.typeName << std::endl;
+            alreadyDeclared.insert (field.typeName);
+        }
+    }
+
+    header << std::endl;
+}
+
 void DataClass::GenerateHeaderFields (std::ofstream &header) const
 {
     header << "private:" << std::endl;
@@ -218,8 +262,10 @@ void DataClass::GenerateObject (const boost::filesystem::path &outputFolder) con
 
     object << "#include \"" << name_ << ".hpp\"" << std::endl <<
            "#include <Core.hpp>" << std::endl <<
-           "#include <utility>" << std::endl << std::endl <<
-           "namespace ResourceSubsystem" << std::endl <<
+           "#include <utility>" << std::endl << std::endl;
+
+    GenerateObjectIncludes (object);
+    object << "namespace ResourceSubsystem" << std::endl <<
            "{" << std::endl <<
            "namespace DataObjects" << std::endl <<
            "{" << std::endl << std::endl;
@@ -231,6 +277,21 @@ void DataClass::GenerateObject (const boost::filesystem::path &outputFolder) con
     object << "}" << std::endl << "}" << std::endl;
     object.close ();
     BOOST_LOG_TRIVIAL (info) << "Done " << objectPath << " generation.";
+}
+
+void DataClass::GenerateObjectIncludes (std::ofstream &object) const
+{
+    std::unordered_set <std::string> alreadyIncluded;
+    for (auto &field : fields_)
+    {
+        if (field.reference && alreadyIncluded.count (field.typeName) == 0)
+        {
+            object << "#include object_class_header_" << field.typeName << std::endl;
+            alreadyIncluded.insert (field.typeName);
+        }
+    }
+
+    object << std::endl;
 }
 
 void DataClass::GenerateObjectAccessors (std::ofstream &object) const
@@ -257,7 +318,7 @@ void DataClass::GenerateObjectAccessors (std::ofstream &object) const
 
 void DataClass::GenerateObjectConstructor (std::ofstream &object) const
 {
-    object << name_ << "::~" << name_ << " (int id, FILE *stream)" << std::endl <<
+    object << name_ << "::" << name_ << " (int id, FILE *stream)" << std::endl <<
            "    : Object (id)";
 
     for (auto &field : fields_)
@@ -325,7 +386,7 @@ void DataClass::InsertValueReader (std::ofstream &object,
                                    const DataClass::Field &field,
                                    const std::string &indentation) const
 {
-    std::string outputName = (field.array ? field.name + "[index]" : field.name) + "_";
+    std::string outputName = (field.array ? field.name + "_[index]" : field.name + "_");
     if (field.typeName == "string")
     {
         object << indentation << "int " << field.name << "Size;" << std::endl <<
@@ -343,16 +404,17 @@ void DataClass::InsertValueReader (std::ofstream &object,
     {
         object << indentation << "unsigned int " << field.name << "GroupId;" << std::endl <<
                indentation << "unsigned int " << field.name << "ObjectId;" << std::endl << std::endl <<
-               indentation << "fread (&" << field.name << "GroupId, sizeof (" << field.name << "GroupId, 1, stream);"
+               indentation << "fread (&" << field.name << "GroupId, sizeof (" << field.name << "GroupId), 1, stream);"
                << std::endl << indentation << "fread (&" << field.name << "ObjectId, sizeof (" << field.name <<
-               "ObjectId, 1, stream);" << std::endl <<
-               indentation << outputName << " = GetResource <" << field.typeName << "> (" <<
+               "ObjectId), 1, stream);" << std::endl <<
+               indentation << outputName << " = (" << field.typeName << 
+               " *) GetResource (object_class_loader_" << field.typeName << ", " <<
                field.name << "GroupId, " << field.name << "ObjectId);" << std::endl;
     }
     else
     {
-        object << indentation << outputName << " = std::move (" << field.typeName <<
-               "(Object::PRIVATE_OBJECT_ID, stream));" << std::endl;
+        object << indentation << outputName << " = " << field.typeName <<
+               "(Object::PRIVATE_OBJECT_ID, stream);" << std::endl;
     }
 
     if (!field.array)

@@ -18,7 +18,6 @@ public:
 
     virtual void GenerateCode (const boost::filesystem::path &outputFolder) const;
     virtual std::vector <std::string> GenerateDefines () const;
-    DataClass *GetClassByName (const std::string &name) const;
 
 private:
     void GenerateLoadersCode (const boost::filesystem::path &outputFolder) const;

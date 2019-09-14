@@ -4,12 +4,13 @@
 #include <vector>
 #include <cstdio>
 #include "ObjectReference.hpp"
+#include "GenerationTask.hpp"
 
 namespace GamedevResourcePacker
 {
 class PluginAPI;
 
-class BOOST_SYMBOL_EXPORT Object
+class BOOST_SYMBOL_EXPORT Object : public GenerationTask
 {
 public:
     virtual ~Object ();
@@ -17,7 +18,6 @@ public:
     const std::string &GetUniqueName () const;
     const std::string &GetResourceClassName () const;
     const std::vector <ObjectReference *> &GetOuterReferences () const;
-    virtual bool Write (FILE *output) const = 0;
 
 protected:
     Object (PluginAPI *ownerAPI, const std::string &uniqueName, const std::string &resourceClassName);

@@ -23,18 +23,27 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
         plugin->GenerateCode (outputFolder, tasks);
     }
 
+    bool anyCodeChanged = false;
     for (auto task : tasks)
     {
         if (task->NeedsExecution (outputFolder))
         {
+            anyCodeChanged = true;
             task->Execute (outputFolder);
         }
     }
 
-    if (objectManager_->IsContentListOverwritten ())
+    boost::filesystem::path idsHeaderPath = outputFolder / "Ids.hpp";
+    boost::filesystem::path definesHeaderPath = outputFolder / "Defines.hpp";
+
+    if (objectManager_->IsContentListOverwritten () || !boost::filesystem::exists (idsHeaderPath))
     {
-        GenerateIdsHeader (outputFolder);
-        GenerateDefinesHeader (outputFolder);
+        GenerateIdsHeader (idsHeaderPath);
+    }
+
+    if (anyCodeChanged || !boost::filesystem::exists (definesHeaderPath))
+    {
+        GenerateDefinesHeader (definesHeaderPath);
     }
 }
 
@@ -70,9 +79,8 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
     }
 }
 
-void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &outputFolder) const
+void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &idsHeaderPath) const
 {
-    boost::filesystem::path idsHeaderPath = outputFolder / "Ids.hpp";
     BOOST_LOG_TRIVIAL (info) << "Generating  " << idsHeaderPath << "...";
     std::ofstream idsHeader (idsHeaderPath.string ());
 
@@ -103,9 +111,8 @@ void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &outputFold
     BOOST_LOG_TRIVIAL (info) << "Done " << idsHeaderPath << " generation.";
 }
 
-void CodeGenerator::GenerateDefinesHeader (const boost::filesystem::path &outputFolder) const
+void CodeGenerator::GenerateDefinesHeader (const boost::filesystem::path &definesHeaderPath) const
 {
-    boost::filesystem::path definesHeaderPath = outputFolder / "Defines.hpp";
     BOOST_LOG_TRIVIAL (info) << "Generating  " << definesHeaderPath << "...";
     std::ofstream definesHeader (definesHeaderPath.string ());
     definesHeader << "#pragma once" << std::endl << std::endl;

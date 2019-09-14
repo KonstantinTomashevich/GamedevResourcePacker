@@ -93,6 +93,7 @@ Object *GetResource (Loader loader, unsigned int group, unsigned int id)
             BOOST_THROW_EXCEPTION (Exception <LoadedObjectIsNull> ("Loaded object is null!"));
         }
 
+        object->Ref ();
         groupInfo.runtime.Add (object);
         return object;
     }

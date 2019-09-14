@@ -392,7 +392,7 @@ void DataClass::InsertValueReader (std::ofstream &object,
         object << indentation << "int " << field.name << "Size;" << std::endl <<
                indentation << "fread (&" << field.name << "Size, sizeof (" << field.name << "Size), 1, stream);" <<
                std::endl << indentation << outputName << ".resize (" << field.name << "Size);" << std::endl <<
-               indentation << "fread (&" << outputName << "[0], sizeof (" << field.name << "Size), 1, stream);" <<
+               indentation << "fread (&" << outputName << "[0], sizeof (char), " << field.name << "Size, stream);" <<
                std::endl;
     }
     else if (IsSimpleField (field))
@@ -402,12 +402,13 @@ void DataClass::InsertValueReader (std::ofstream &object,
     }
     else if (field.reference)
     {
+        // TODO: References should use some kind of weak refs to avoid possible crashes on multiple deletions with incorrect order.
         object << indentation << "unsigned int " << field.name << "GroupId;" << std::endl <<
                indentation << "unsigned int " << field.name << "ObjectId;" << std::endl << std::endl <<
                indentation << "fread (&" << field.name << "GroupId, sizeof (" << field.name << "GroupId), 1, stream);"
                << std::endl << indentation << "fread (&" << field.name << "ObjectId, sizeof (" << field.name <<
                "ObjectId), 1, stream);" << std::endl <<
-               indentation << outputName << " = (" << field.typeName << 
+               indentation << outputName << " = (" << field.typeName <<
                " *) GetResource (object_class_loader_" << field.typeName << ", " <<
                field.name << "GroupId, " << field.name << "ObjectId);" << std::endl;
     }

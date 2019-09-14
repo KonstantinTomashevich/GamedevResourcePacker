@@ -137,11 +137,11 @@ std::vector <std::string> PluginAPI::GenerateDefines () const
         result.emplace_back ("object_class_header_" + nameClassPair.first + " <" + GetName () +
             "/" + nameClassPair.first + ".hpp>");
 
-        result.emplace_back ("object_class_forward_" + nameClassPair.first + " namespace DataObjects { class "
-                                 + nameClassPair.first + "; }");
+        result.emplace_back ("object_class_forward_" + nameClassPair.first + " namespace " + GetName () +
+            " { class " + nameClassPair.first + "; }");
 
-        result.emplace_back ("object_class_loader_" + nameClassPair.first + " DataObjects::DataObjectLoader <"
-                                 + nameClassPair.first + ">");
+        result.emplace_back ("object_class_loader_" + nameClassPair.first + " " + GetName () +
+            "::DataObjectLoader <" + GetName () + "::" + nameClassPair.first + ">");
     }
 
     return result;

@@ -131,7 +131,7 @@ void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder,
     boost::filesystem::path loadersPath = outputFolder / GetName () / std::string ("Loader.hpp");
     if (!boost::filesystem::exists (loadersPath))
     {
-        GenerateLoadersCode (outputFolder);
+        GenerateLoadersCode (loadersPath);
     }
 }
 

@@ -22,7 +22,7 @@ int Main (int argCount, char **argValues)
     if (argCount != 5)
     {
         printf ("Expected arguments:\n"
-                "    Variant 1. 3 args:\n"
+                "    Variant 1. 4 args:\n"
                 "        - plugin config folder.\n"
                 "        - assets folder.\n"
                 "        - package output folder.\n"

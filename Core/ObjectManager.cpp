@@ -11,7 +11,7 @@ namespace GamedevResourcePacker
 using DirRecursiveIterator = boost::filesystem::recursive_directory_iterator;
 
 ObjectManager::ObjectManager ()
-    : resourceClassMap_ ()
+    : resourceClassMap_ (), contentListOverwritten_ (false)
 {
 
 }
@@ -31,6 +31,11 @@ ObjectManager::~ObjectManager ()
 const ObjectManager::ResourceClassMap &ObjectManager::GetResourceClassMap () const
 {
     return resourceClassMap_;
+}
+
+bool ObjectManager::IsContentListOverwritten () const
+{
+    return contentListOverwritten_;
 }
 
 const ObjectManager::ObjectNameMap *ObjectManager::GetObjectMap (const std::string &resourceClass) const
@@ -122,7 +127,7 @@ void ObjectManager::ResolveObjectReferences ()
     }
 }
 
-bool ObjectManager::WriteBinaries (const boost::filesystem::path &outputFolder) const
+bool ObjectManager::WriteBinaries (const boost::filesystem::path &outputFolder)
 {
     boost::filesystem::create_directories (outputFolder);
     return WriteContentList (outputFolder) && WriteObjects (outputFolder);
@@ -146,9 +151,30 @@ void ObjectManager::ResolveObjectReference (ObjectReference *reference)
     reference->Resolve (StringHash (reference->GetClassName ()), StringHash (reference->GetObjectName ()));
 }
 
-bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolder) const
+bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolder)
 {
     boost::filesystem::path target = outputFolder / "content.list";
+    std::unordered_map <unsigned int, std::unordered_set <unsigned int> > existingHashes;
+
+    for (auto &resourceClassObjectMapPair : resourceClassMap_)
+    {
+        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
+        existingHashes.insert (std::make_pair (classNameHash, std::unordered_set <unsigned int> ()));
+        const ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
+
+        for (auto &nameObjectPair : objectNameMap)
+        {
+            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+            existingHashes[classNameHash].insert (objectNameHash);
+        }
+    }
+
+    contentListOverwritten_ = IsContentListChanged (target, existingHashes);
+    if (!contentListOverwritten_)
+    {
+        return true;
+    }
+
     FILE *output = fopen (target.string ().c_str (), "wb");
 
     if (output == nullptr)
@@ -158,21 +184,21 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
     }
 
     BOOST_LOG_TRIVIAL (info) << "Generating " << target << "...";
-    size_t sizeContainer = resourceClassMap_.size ();
+    size_t sizeContainer = existingHashes.size ();
     fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
 
-    for (auto &resourceClassObjectMapPair : resourceClassMap_)
+    for (auto &nameHashHashSetPair : existingHashes)
     {
-        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
+        unsigned int classNameHash = nameHashHashSetPair.first;
         fwrite (&classNameHash, sizeof (classNameHash), 1, output);
 
-        const ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
-        sizeContainer = objectNameMap.size ();
+        const std::unordered_set <unsigned int> &objectsHashSet = nameHashHashSetPair.second;
+        sizeContainer = objectsHashSet.size ();
         fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
 
-        for (auto &nameObjectPair : objectNameMap)
+        for (auto &hash : objectsHashSet)
         {
-            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+            unsigned int objectNameHash = hash;
             fwrite (&objectNameHash, sizeof (objectNameHash), 1, output);
         }
     }
@@ -193,33 +219,65 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
 
         for (auto &nameObjectPair : objectNameMap)
         {
-            unsigned int objectNameHash = StringHash (nameObjectPair.first);
             const Object *object = nameObjectPair.second;
-            boost::filesystem::path target = classOutputFolder / std::to_string (objectNameHash);
-            FILE *output = fopen (target.string ().c_str (), "wb");
-
-            if (output == nullptr)
+            if (object->NeedsExecution (classOutputFolder))
             {
-                BOOST_LOG_TRIVIAL (fatal) << "Unable to open " << target << " for object \"" <<
-                                          object->GetUniqueName () << "\" of type \"" <<
-                                          resourceClassObjectMapPair.first << "\" binary output.";
-                return false;
+                if (!object->Execute (classOutputFolder))
+                {
+                    BOOST_LOG_TRIVIAL (fatal) << "Unable to write object \"" << object->GetUniqueName () <<
+                                              "\" of type \"" << resourceClassObjectMapPair.first <<
+                                              "\" because of internal error.";
+                    return false;
+                }
             }
-
-            BOOST_LOG_TRIVIAL (info) << "Generating " << target << "...";
-            if (!object->Write (output))
-            {
-                BOOST_LOG_TRIVIAL (fatal) << "Unable to write object \"" << object->GetUniqueName () <<
-                                          "\" of type \"" << resourceClassObjectMapPair.first <<
-                                          "\" because of internal error.";
-                return false;
-            }
-
-            fclose (output);
-            BOOST_LOG_TRIVIAL (info) << "Done " << target << " generation.";
         }
     }
 
     return true;
+}
+
+bool ObjectManager::IsContentListChanged (const boost::filesystem::path &contentListPath,
+                                          const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
+                                          existingHashes) const
+{
+    if (!boost::filesystem::exists (contentListPath))
+    {
+        return true;
+    }
+
+    FILE *contentList = fopen (contentListPath.string ().c_str (), "rb");
+    if (!contentList)
+    {
+        return true;
+    }
+
+    size_t groupCount;
+    fread (&groupCount, sizeof (groupCount), 1, contentList);
+
+    if (groupCount != resourceClassMap_.size ())
+    {
+        return true;
+    }
+
+    std::unordered_map <unsigned int, std::unordered_set <unsigned int> > foundHashes;
+    for (int groupIndex = 0; groupIndex < groupCount; ++groupIndex)
+    {
+        unsigned int groupId;
+        fread (&groupId, sizeof (groupId), 1, contentList);
+        foundHashes.insert (std::make_pair (groupId, std::unordered_set <unsigned int> ()));
+
+        size_t groupSize;
+        fread (&groupSize, sizeof (groupSize), 1, contentList);
+
+        for (int objectIndex = 0; objectIndex < groupSize; ++objectIndex)
+        {
+            unsigned int objectId;
+            fread (&objectId, sizeof (objectId), 1, contentList);
+            foundHashes[groupId].insert (objectId);
+        }
+    }
+
+    fclose (contentList);
+    return existingHashes != foundHashes;
 }
 }

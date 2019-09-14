@@ -1,6 +1,7 @@
 #include "CodeGenerator.hpp"
 #include <boost/log/trivial.hpp>
 #include <Shared/StringHash.hpp>
+#include <Shared/FileUtils.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -15,13 +16,26 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
     boost::filesystem::create_directories (outputFolder);
     CopyBundleIndependentCode (outputFolder);
 
+    std::vector <GenerationTask *> tasks;
+
     for (auto &plugin : pluginManager_->GetPluginsVector ())
     {
-        plugin->GenerateCode (outputFolder);
+        plugin->GenerateCode (outputFolder, tasks);
     }
 
-    GenerateIdsHeader (outputFolder);
-    GenerateDefinesHeader (outputFolder);
+    for (auto task : tasks)
+    {
+        if (task->NeedsExecution (outputFolder))
+        {
+            task->Execute (outputFolder);
+        }
+    }
+
+    if (objectManager_->IsContentListOverwritten ())
+    {
+        GenerateIdsHeader (outputFolder);
+        GenerateDefinesHeader (outputFolder);
+    }
 }
 
 void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &outputFolder) const
@@ -36,11 +50,14 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
         {
             boost::filesystem::path output =
                 outputFolder / iterator->path ().lexically_relative (bundleIndependentCodeRoot);
-            BOOST_LOG_TRIVIAL (info) << "Generating " << output << "...";
 
-            boost::filesystem::copy_file (iterator->path (), output,
-                                          boost::filesystem::copy_option::overwrite_if_exists);
-            BOOST_LOG_TRIVIAL (info) << "Done " << output << " generation.";
+            if (IsFileNeedsUpdate (output, {iterator->path ()}))
+            {
+                BOOST_LOG_TRIVIAL (info) << "Generating " << output << "...";
+                boost::filesystem::copy_file (iterator->path (), output,
+                                              boost::filesystem::copy_option::overwrite_if_exists);
+                BOOST_LOG_TRIVIAL (info) << "Done " << output << " generation.";
+            }
         }
         else if (iterator->status ().type () == boost::filesystem::directory_file)
         {

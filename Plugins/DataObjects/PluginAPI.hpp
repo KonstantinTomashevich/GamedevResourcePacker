@@ -16,11 +16,12 @@ public:
     virtual bool Load (const boost::filesystem::path &configFolder);
     virtual Object *Capture (const boost::filesystem::path &asset);
 
-    virtual void GenerateCode (const boost::filesystem::path &outputFolder) const;
+    virtual void GenerateCode (const boost::filesystem::path &outputFolder,
+                               std::vector <GenerationTask *> &outputTasks) const;
     virtual std::vector <std::string> GenerateDefines () const;
 
 private:
-    void GenerateLoadersCode (const boost::filesystem::path &outputFolder) const;
+    void GenerateLoadersCode (const boost::filesystem::path &output) const;
 
     DataClassProvider dataClassProvider_;
 };

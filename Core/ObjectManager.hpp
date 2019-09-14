@@ -2,6 +2,7 @@
 #include <Shared/Object.hpp>
 #include "PluginManager.hpp"
 #include <unordered_map>
+#include <unordered_set>
 #include <boost/filesystem.hpp>
 
 namespace GamedevResourcePacker
@@ -16,15 +17,15 @@ public:
     virtual ~ObjectManager ();
 
     const ResourceClassMap &GetResourceClassMap () const;
+    bool IsContentListOverwritten () const;
     /// Returns null if there is no object name map for given resource class.
     const ObjectNameMap *GetObjectMap (const std::string &resourceClass) const;
     /// Recursively scans assets folder trying to capture objects.
     void ScanAssetsDir (const boost::filesystem::path &assetsFolder, PluginManager *pluginManager);
     /// Tries to resolve outer references for all objects, throws exception on failure.
     void ResolveObjectReferences ();
-    // TODO: Implement up-to-date cheking.
     /// Tries to write index and assets to given output folder.
-    bool WriteBinaries (const boost::filesystem::path &outputFolder) const;
+    bool WriteBinaries (const boost::filesystem::path &outputFolder);
 
     // Exceptions.
     class ClassNameHashCollision;
@@ -33,9 +34,13 @@ public:
 
 private:
     void ResolveObjectReference (ObjectReference *reference);
-    bool WriteContentList (const boost::filesystem::path &outputFolder) const;
+    bool WriteContentList (const boost::filesystem::path &outputFolder);
     bool WriteObjects (const boost::filesystem::path &rootOutputFolder) const;
+    bool IsContentListChanged (const boost::filesystem::path &contentListPath,
+                               const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
+                               existingHashes) const;
 
     ResourceClassMap resourceClassMap_;
+    bool contentListOverwritten_;
 };
 }

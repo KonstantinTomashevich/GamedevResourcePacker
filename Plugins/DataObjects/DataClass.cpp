@@ -16,6 +16,10 @@ DataClass::DataClass (const boost::filesystem::path &xmlPath)
     PTree tree;
     boost::property_tree::read_xml (xmlPath.string (), tree);
     LoadFromTree (tree);
+
+    generationTargets_.push_back ("DataObjects/" + name_ + ".hpp");
+    generationTargets_.push_back ("DataObjects/" + name_ + ".cpp");
+    generationDependencies_.push_back (xmlPath);
 }
 
 DataClass::~DataClass ()
@@ -33,10 +37,10 @@ const DataClass::FieldVector &DataClass::GetFields () const
     return fields_;
 }
 
-void DataClass::GenerateCode (const boost::filesystem::path &outputFolder) const
+bool DataClass::Execute (const boost::filesystem::path &outputFolder) const
 {
-    GenerateHeader (outputFolder);
-    GenerateObject (outputFolder);
+    GenerateHeader (outputFolder / "DataObjects");
+    GenerateObject (outputFolder / "DataObjects");
 }
 
 void DataClass::LoadFromTree (boost::property_tree::ptree &tree)

@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 #include <unordered_set>
+#include <Shared/FileDependentGenerationTask.hpp>
+
 #include <boost/container/small_vector.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/exception/all.hpp>
@@ -12,7 +14,7 @@ namespace GamedevResourcePacker
 {
 namespace DataObjectsPlugin
 {
-class BOOST_SYMBOL_EXPORT DataClass
+class BOOST_SYMBOL_EXPORT DataClass : public FileDependentGenerationTask
 {
 public:
     using Field = struct
@@ -31,7 +33,7 @@ public:
 
     const std::string &GetName () const;
     const FieldVector &GetFields () const;
-    void GenerateCode (const boost::filesystem::path &outputFolder) const;
+    virtual bool Execute (const boost::filesystem::path &outputFolder) const;
 
     class XMLParseException;
 

@@ -102,7 +102,8 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 
         try
         {
-            DataObject *object = new DataObject (name->data (), rootObjectName, rootObject, this, &dataClassProvider_);
+            DataObject *object = new DataObject (name->data (), asset,
+                                                 rootObjectName, rootObject, this, &dataClassProvider_);
             return object;
         }
         catch (boost::exception &exception)
@@ -116,17 +117,22 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
     return nullptr;
 }
 
-void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder) const
+void PluginAPI::GenerateCode (const boost::filesystem::path &outputFolder,
+                              std::vector <GenerationTask *> &outputTasks) const
 {
     boost::filesystem::path classesFolder = outputFolder / GetName ();
     boost::filesystem::create_directories (classesFolder);
 
     for (const auto &nameClassPair : dataClassProvider_.GetDataClasses ())
     {
-        nameClassPair.second->GenerateCode (classesFolder);
+        outputTasks.push_back (nameClassPair.second);
     }
 
-    GenerateLoadersCode (outputFolder);
+    boost::filesystem::path loadersPath = outputFolder / GetName () / std::string ("Loader.hpp");
+    if (!boost::filesystem::exists (loadersPath))
+    {
+        GenerateLoadersCode (outputFolder);
+    }
 }
 
 std::vector <std::string> PluginAPI::GenerateDefines () const
@@ -147,11 +153,10 @@ std::vector <std::string> PluginAPI::GenerateDefines () const
     return result;
 }
 
-void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder) const
+void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &output) const
 {
-    boost::filesystem::path loadersPath = outputFolder / GetName () / std::string ("Loader.hpp");
-    BOOST_LOG_TRIVIAL (info) << "Generating  " << loadersPath << "...";
-    std::ofstream loaders (loadersPath.string ());
+    BOOST_LOG_TRIVIAL (info) << "Generating  " << output << "...";
+    std::ofstream loaders (output.string ());
 
     loaders << "#pragma once" << std::endl <<
             "#include <cstdio>" << std::endl <<
@@ -169,7 +174,7 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &outputFolder
             "}" << std::endl << "}" << std::endl << "}" << std::endl;
 
     loaders.close ();
-    BOOST_LOG_TRIVIAL (info) << "Done " << loadersPath << " generation.";
+    BOOST_LOG_TRIVIAL (info) << "Done " << output << " generation.";
 }
 }
 }

@@ -4,6 +4,7 @@
 #include <Shared/StringHash.hpp>
 #include <Shared/MultithreadedLog.hpp>
 
+#include <boost/thread/mutex.hpp>
 #include <boost/log/trivial.hpp>
 #include <unordered_set>
 #include <cstdio>
@@ -59,30 +60,42 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
     MT_LOG (info, "Loading assets from folder " << assetsFolder << ".");
     DirRecursiveIterator iterator (assetsFolder);
     DirRecursiveIterator end;
+    std::vector <boost::filesystem::path> possibleAssets;
 
     while (iterator != end)
     {
         if (iterator->status ().type () == boost::filesystem::regular_file)
         {
-            MT_LOG (info, "Trying to capture asset " << iterator->path () << ".");
-            Object *object = pluginManager->Capture (iterator->path ());
-
-            if (object != nullptr)
-            {
-                resourceClassMap_[object->GetResourceClassName ()].insert (
-                    std::make_pair (object->GetUniqueName (), object));
-
-                MT_LOG (info, "Plugin " << object->GetOwnerAPI ()->GetName () <<
-                                         " captured asset " << object->GetUniqueName () << " of type "
-                                         << object->GetResourceClassName () << ".");
-            }
-            else
-            {
-                MT_LOG (info, "Asset " << iterator->path () << " isn't captured by any plugin.");
-            }
+            possibleAssets.push_back (iterator->path ());
         }
 
         ++iterator;
+    }
+
+    // TODO: It will speedup process only if there is a lot of plugins (maybe 10 or more). Think if its useful.
+    boost::mutex resourceClassMapInsert;
+#pragma omp parallel for
+    for (int index = 0; index < possibleAssets.size (); ++index)
+    {
+        boost::filesystem::path &asset = possibleAssets[index];
+        MT_LOG (info, "Trying to capture asset " << asset << ".");
+        Object *object = pluginManager->Capture (asset);
+
+        if (object != nullptr)
+        {
+            resourceClassMapInsert.lock ();
+            resourceClassMap_[object->GetResourceClassName ()].insert (
+                std::make_pair (object->GetUniqueName (), object));
+            resourceClassMapInsert.unlock ();
+
+            MT_LOG (info, "Plugin " << object->GetOwnerAPI ()->GetName () <<
+                                    " captured asset " << object->GetUniqueName () << " of type "
+                                    << object->GetResourceClassName () << ".");
+        }
+        else
+        {
+            MT_LOG (info, "Asset " << iterator->path () << " isn't captured by any plugin.");
+        }
     }
 }
 
@@ -90,13 +103,11 @@ void ObjectManager::ResolveObjectReferences ()
 {
     MT_LOG (info, "Resolving objects outer references...");
     std::unordered_set <unsigned int> usedClassNames;
+    std::vector <Object *> plainObjectList;
 
     for (auto &resourceClassObjectMapPair : resourceClassMap_)
     {
-        MT_LOG (info, "Resolving outer references for objects of class \"" <<
-                                 resourceClassObjectMapPair.first << "\"...");
         unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
-
         if (usedClassNames.count (classNameHash))
         {
             BOOST_THROW_EXCEPTION (Exception <ClassNameHashCollision> ("Hash " + std::to_string (classNameHash) +
@@ -109,7 +120,6 @@ void ObjectManager::ResolveObjectReferences ()
 
         for (auto &nameObjectPair : objectNameMap)
         {
-            MT_LOG (info, "Resolving outer references for object \"" << nameObjectPair.first << "\"...");
             unsigned int objectNameHash = StringHash (nameObjectPair.first);
 
             if (usedObjectNames.count (objectNameHash))
@@ -120,11 +130,21 @@ void ObjectManager::ResolveObjectReferences ()
 
             usedObjectNames.insert (objectNameHash);
             Object *object = nameObjectPair.second;
+            plainObjectList.push_back (object);
+        }
+    }
 
-            for (ObjectReference *reference : object->GetOuterReferences ())
-            {
-                ResolveObjectReference (reference);
-            }
+    // TODO: Does it really speedups process?
+#pragma omp parallel for
+    for (int index = 0; index < plainObjectList.size (); ++index)
+    {
+        Object *object = plainObjectList[index];
+        MT_LOG (info, "Resolving outer references for object \"" << object->GetResourceClassName () << "::" <<
+                                                                 object->GetUniqueName () << "\"...");
+
+        for (ObjectReference *reference : object->GetOuterReferences ())
+        {
+            ResolveObjectReference (reference);
         }
     }
 }
@@ -212,6 +232,7 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
 
 bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolder) const
 {
+    std::vector <const Object *> plainObjectList;
     for (auto &resourceClassObjectMapPair : resourceClassMap_)
     {
         unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
@@ -222,20 +243,32 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
         for (auto &nameObjectPair : objectNameMap)
         {
             const Object *object = nameObjectPair.second;
-            if (object->NeedsExecution (classOutputFolder))
+            plainObjectList.push_back (object);
+        }
+    }
+
+    bool failed = false;
+#pragma omp parallel for
+    for (int index = 0; index < plainObjectList.size (); ++index)
+    {
+        const Object * object = plainObjectList[index];
+        // TODO: Maybe stop creating separate dirs for resource classes?
+        unsigned int classNameHash = StringHash (object->GetResourceClassName ());
+        boost::filesystem::path classOutputFolder = rootOutputFolder / std::to_string (classNameHash);
+
+        if (object->NeedsExecution (classOutputFolder))
+        {
+            if (!object->Execute (classOutputFolder))
             {
-                if (!object->Execute (classOutputFolder))
-                {
-                    MT_LOG (fatal, "Unable to write object \"" << object->GetUniqueName () <<
-                                              "\" of type \"" << resourceClassObjectMapPair.first <<
-                                              "\" because of internal error.");
-                    return false;
-                }
+                MT_LOG (fatal, "Unable to write object \"" << object->GetUniqueName () <<
+                                                           "\" of type \"" << object->GetResourceClassName () <<
+                                                           "\" because of internal error.");
+                failed = true;
             }
         }
     }
 
-    return true;
+    return !failed;
 }
 
 bool ObjectManager::IsContentListChanged (const boost::filesystem::path &contentListPath,

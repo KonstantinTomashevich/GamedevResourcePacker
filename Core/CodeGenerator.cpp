@@ -19,15 +19,16 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
     CopyBundleIndependentCode (outputFolder);
 
     std::vector <GenerationTask *> tasks;
-
     for (auto &plugin : pluginManager_->GetPluginsVector ())
     {
         plugin->GenerateCode (outputFolder, tasks);
     }
 
     bool anyCodeChanged = false;
-    for (auto task : tasks)
+#pragma omp parallel for
+    for (int index = 0; index < tasks.size (); ++index)
     {
+        auto &task = tasks[index];
         if (task->NeedsExecution (outputFolder))
         {
             anyCodeChanged = true;
@@ -55,6 +56,9 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
     boost::filesystem::recursive_directory_iterator iterator (bundleIndependentCodeRoot);
     boost::filesystem::recursive_directory_iterator end;
 
+    using FileOutputPair = std::pair <boost::filesystem::path, boost::filesystem::path>;
+    std::vector <FileOutputPair> filesToCopy;
+
     while (iterator != end)
     {
         if (iterator->status ().type () == boost::filesystem::regular_file)
@@ -64,10 +68,7 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
 
             if (IsFileNeedsUpdate (output, {iterator->path ()}))
             {
-                MT_LOG (info, "Generating " << output << "...");
-                boost::filesystem::copy_file (iterator->path (), output,
-                                              boost::filesystem::copy_option::overwrite_if_exists);
-                MT_LOG (info, "Done " << output << " generation.");
+                filesToCopy.emplace_back (std::make_pair (iterator->path (), output));
             }
         }
         else if (iterator->status ().type () == boost::filesystem::directory_file)
@@ -78,6 +79,18 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
         }
 
         ++iterator;
+    }
+
+#pragma omp parallel for
+    for (int index = 0; index < filesToCopy.size (); ++index)
+    {
+        boost::filesystem::path &file = filesToCopy[index].first;
+        boost::filesystem::path &output = filesToCopy[index].second;
+
+        MT_LOG (info, "Generating " << output << "...");
+        boost::filesystem::copy_file (file, output,
+                                      boost::filesystem::copy_option::overwrite_if_exists);
+        MT_LOG (info, "Done " << output << " generation.");
     }
 }
 

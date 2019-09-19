@@ -55,9 +55,14 @@ void PluginManager::LoadPlugins ()
 bool PluginManager::LoadPluginsConfig (const Path &configFolder)
 {
     MT_LOG(info, "Loading plugins config from " << configFolder.string () << ".");
-    for (auto &plugin : plugins_)
+    bool failed = false;
+
+#pragma omp parallel for
+    for (int index = 0; index < plugins_.size (); ++index)
     {
+        auto &plugin = plugins_[index];
         MT_LOG(info, "Loading config of plugin \"" << plugin->GetName () << "\".");
+
         if (plugin->Load (configFolder))
         {
             MT_LOG(info, "Done loading config for plugin \"" << plugin->GetName () << "\".");
@@ -65,11 +70,11 @@ bool PluginManager::LoadPluginsConfig (const Path &configFolder)
         else
         {
             MT_LOG(fatal, "Unable to load config for plugin \"" << plugin->GetName () << "\".");
-            return false;
+            failed = true;
         }
     }
 
-    return true;
+    return !failed;
 }
 
 const PluginVector &PluginManager::GetPluginsVector () const

@@ -23,6 +23,7 @@ bool PluginAPI::Load (const Path &configFolder)
     DirIterator iterator (classesFolder);
     DirIterator end;
 
+    // TODO: Is it worth multithreading?
     while (iterator != end)
     {
         if (iterator->status ().type () == boost::filesystem::regular_file)

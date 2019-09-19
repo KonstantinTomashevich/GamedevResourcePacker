@@ -4,7 +4,9 @@
 #include <boost/dll.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/exception/all.hpp>
+
 #include <Shared/PluginAPI.hpp>
+#include <Shared/MultithreadedLog.hpp>
 
 #include "PluginManager.hpp"
 #include "ObjectManager.hpp"
@@ -50,7 +52,7 @@ int Main (int argCount, char **argValues)
     }
     catch (boost::exception &exception)
     {
-        BOOST_LOG_TRIVIAL (fatal) << "Exception caught: " << boost::diagnostic_information (exception);
+        MT_LOG (fatal, "Exception caught: " << boost::diagnostic_information (exception));
         return PACKAGING_FATAL_ERROR;
     }
 

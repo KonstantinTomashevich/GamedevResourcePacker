@@ -1,5 +1,7 @@
 #include "PluginAPI.hpp"
 #include "DataObject.hpp"
+#include <Shared/MultithreadedLog.hpp>
+
 #include <boost/log/trivial.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -25,26 +27,26 @@ bool PluginAPI::Load (const Path &configFolder)
     {
         if (iterator->status ().type () == boost::filesystem::regular_file)
         {
-            BOOST_LOG_TRIVIAL (info) << "Trying to load data class from " << iterator->path () << ".";
+            MT_LOG (info, "Trying to load data class from " << iterator->path () << ".");
             try
             {
                 DataClass *dataClass = new DataClass (iterator->path ());
                 if (dataClassProvider_.AddDataClass (dataClass))
                 {
-                    BOOST_LOG_TRIVIAL (info) << "Loaded class " << dataClass->GetName () << " from file " <<
-                                             iterator->path () << ".";
+                    MT_LOG (info, "Loaded class " << dataClass->GetName () << " from file " <<
+                                             iterator->path () << ".");
                 }
                 else
                 {
-                    BOOST_LOG_TRIVIAL (error) << "Unable to load class from " << iterator->path ()
+                    MT_LOG (error, "Unable to load class from " << iterator->path ()
                                               << " because class with name " <<
-                                              dataClass->GetName () << " already loaded.";
+                                              dataClass->GetName () << " already loaded.");
                 }
             }
             catch (boost::exception &exception)
             {
-                BOOST_LOG_TRIVIAL (error) << "Unable to load because of exception: "
-                                          << boost::diagnostic_information (exception);
+                MT_LOG (error, "Unable to load because of exception: "
+                                          << boost::diagnostic_information (exception));
             }
         }
 
@@ -69,15 +71,14 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 
         if (xmlRoot->size () > 2)
         {
-            BOOST_LOG_TRIVIAL (warning)
-                << "Data Objects: given object has more than one root child. "
-                   "Only first will be parsed, others will be ignored.";
+            MT_LOG (warning, "Data Objects: given object has more than one root child. "
+                   "Only first will be parsed, others will be ignored.");
         }
 
         auto name = xmlRoot->get_child_optional ("<xmlattr>.name");
         if (!name.is_initialized ())
         {
-            BOOST_LOG_TRIVIAL (error) << "Data Objects: given object has no name, so it will be ignored.";
+            MT_LOG (error, "Data Objects: given object has no name, so it will be ignored.");
             return nullptr;
         }
 
@@ -96,7 +97,7 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
 
         if (rootObject.empty ())
         {
-            BOOST_LOG_TRIVIAL (error) << "Data Objects: given object has empty object, so it will be ignored.";
+            MT_LOG (error, "Data Objects: given object has empty object, so it will be ignored.");
             return nullptr;
         }
 
@@ -108,8 +109,8 @@ Object *PluginAPI::Capture (const boost::filesystem::path &asset)
         }
         catch (boost::exception &exception)
         {
-            BOOST_LOG_TRIVIAL (error) << "Exception caught: " << boost::diagnostic_information (exception);
-            BOOST_LOG_TRIVIAL (error) << "Data Objects: unable to parse given data object because of exception.";
+            MT_LOG (error, "Exception caught: " << boost::diagnostic_information (exception));
+            MT_LOG (error, "Data Objects: unable to parse given data object because of exception.");
             return nullptr;
         }
     }
@@ -155,7 +156,7 @@ std::vector <std::string> PluginAPI::GenerateDefines () const
 
 void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &output) const
 {
-    BOOST_LOG_TRIVIAL (info) << "Generating  " << output << "...";
+    MT_LOG (info, "Generating  " << output << "...");
     std::ofstream loaders (output.string ());
 
     loaders << "#pragma once" << std::endl <<
@@ -174,7 +175,7 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &output) cons
             "}" << std::endl << "}" << std::endl << "}" << std::endl;
 
     loaders.close ();
-    BOOST_LOG_TRIVIAL (info) << "Done " << output << " generation.";
+    MT_LOG (info, "Done " << output << " generation.");
 }
 }
 }

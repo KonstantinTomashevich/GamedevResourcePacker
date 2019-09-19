@@ -4,6 +4,7 @@
 
 #include <boost/log/trivial.hpp>
 #include <Shared/StringHash.hpp>
+#include <Shared/MultithreadedLog.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -39,20 +40,20 @@ bool DataObject::NeedsExecution (const boost::filesystem::path &outputFolder) co
 bool DataObject::Execute (const boost::filesystem::path &outputFolder) const
 {
     boost::filesystem::path target = outputFolder / std::to_string (StringHash (GetUniqueName ()));
-    BOOST_LOG_TRIVIAL (info) << "Generation " << target << "...";
+    MT_LOG (info, "Generation " << target << "...");
     FILE *output = fopen (target.string ().c_str (), "wb");
 
     if (output == nullptr)
     {
-        BOOST_LOG_TRIVIAL (fatal) << "Unable to open " << target << " for object \"" <<
+        MT_LOG (fatal, "Unable to open " << target << " for object \"" <<
                                   GetUniqueName () << "\" of type \"" <<
-                                  GetResourceClassName () << "\" binary output.";
+                                  GetResourceClassName () << "\" binary output.");
         return false;
     }
 
     bool result = rootField_->Write (output);
     fclose (output);
-    BOOST_LOG_TRIVIAL (info) << "Done " << target << " generation.";
+    MT_LOG (info, "Done " << target << " generation.");
     return result;
 }
 }

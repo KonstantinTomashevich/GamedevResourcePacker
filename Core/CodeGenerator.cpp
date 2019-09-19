@@ -1,7 +1,9 @@
 #include "CodeGenerator.hpp"
 #include <boost/log/trivial.hpp>
+
 #include <Shared/StringHash.hpp>
 #include <Shared/FileUtils.hpp>
+#include <Shared/MultithreadedLog.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -62,10 +64,10 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
 
             if (IsFileNeedsUpdate (output, {iterator->path ()}))
             {
-                BOOST_LOG_TRIVIAL (info) << "Generating " << output << "...";
+                MT_LOG (info, "Generating " << output << "...");
                 boost::filesystem::copy_file (iterator->path (), output,
                                               boost::filesystem::copy_option::overwrite_if_exists);
-                BOOST_LOG_TRIVIAL (info) << "Done " << output << " generation.";
+                MT_LOG (info, "Done " << output << " generation.");
             }
         }
         else if (iterator->status ().type () == boost::filesystem::directory_file)
@@ -81,7 +83,7 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
 
 void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &idsHeaderPath) const
 {
-    BOOST_LOG_TRIVIAL (info) << "Generating  " << idsHeaderPath << "...";
+    MT_LOG (info, "Generating  " << idsHeaderPath << "...");
     std::ofstream idsHeader (idsHeaderPath.string ());
 
     idsHeader << "#pragma once" << std::endl <<
@@ -108,12 +110,12 @@ void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &idsHeaderP
 
 
     idsHeader << "}" << std::endl << "}" << std::endl;
-    BOOST_LOG_TRIVIAL (info) << "Done " << idsHeaderPath << " generation.";
+    MT_LOG (info, "Done " << idsHeaderPath << " generation.");
 }
 
 void CodeGenerator::GenerateDefinesHeader (const boost::filesystem::path &definesHeaderPath) const
 {
-    BOOST_LOG_TRIVIAL (info) << "Generating  " << definesHeaderPath << "...";
+    MT_LOG (info, "Generating  " << definesHeaderPath << "...");
     std::ofstream definesHeader (definesHeaderPath.string ());
     definesHeader << "#pragma once" << std::endl << std::endl;
 
@@ -130,6 +132,6 @@ void CodeGenerator::GenerateDefinesHeader (const boost::filesystem::path &define
         definesHeader << std::endl;
     }
 
-    BOOST_LOG_TRIVIAL (info) << "Done " << definesHeaderPath << " generation.";
+    MT_LOG (info, "Done " << definesHeaderPath << " generation.");
 }
 }

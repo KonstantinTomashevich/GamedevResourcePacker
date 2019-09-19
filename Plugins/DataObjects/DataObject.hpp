@@ -12,6 +12,7 @@ namespace GamedevResourcePacker
 namespace DataObjectsPlugin
 {
 class PluginAPI;
+// TODO: Maybe do not cache the data objects fields? In large project it may be a problem. But in EU4 they aren't big.
 class BOOST_SYMBOL_EXPORT DataObject : public Object, private FileDependentGenerationTask
 {
 public:
@@ -24,6 +25,7 @@ public:
 
     void Print (std::ostream &output) const;
     virtual bool NeedsExecution (const boost::filesystem::path &outputFolder) const;
+    // TODO: Think about conversion. Maybe we can write file in such way that allows us to read whole object with one fread?
     virtual bool Execute(const boost::filesystem::path &outputFolder) const;
 
 private:

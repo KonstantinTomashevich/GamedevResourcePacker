@@ -2,6 +2,8 @@
 #include "Exception.hpp"
 
 #include <Shared/StringHash.hpp>
+#include <Shared/MultithreadedLog.hpp>
+
 #include <boost/log/trivial.hpp>
 #include <unordered_set>
 #include <cstdio>
@@ -54,7 +56,7 @@ const ObjectManager::ObjectNameMap *ObjectManager::GetObjectMap (const std::stri
 void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
                                    GamedevResourcePacker::PluginManager *pluginManager)
 {
-    BOOST_LOG_TRIVIAL (info) << "Loading assets from folder " << assetsFolder << ".";
+    MT_LOG (info, "Loading assets from folder " << assetsFolder << ".");
     DirRecursiveIterator iterator (assetsFolder);
     DirRecursiveIterator end;
 
@@ -62,7 +64,7 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
     {
         if (iterator->status ().type () == boost::filesystem::regular_file)
         {
-            BOOST_LOG_TRIVIAL (info) << "Trying to capture asset " << iterator->path () << ".";
+            MT_LOG (info, "Trying to capture asset " << iterator->path () << ".");
             Object *object = pluginManager->Capture (iterator->path ());
 
             if (object != nullptr)
@@ -70,13 +72,13 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
                 resourceClassMap_[object->GetResourceClassName ()].insert (
                     std::make_pair (object->GetUniqueName (), object));
 
-                BOOST_LOG_TRIVIAL (info) << "Plugin " << object->GetOwnerAPI ()->GetName () <<
+                MT_LOG (info, "Plugin " << object->GetOwnerAPI ()->GetName () <<
                                          " captured asset " << object->GetUniqueName () << " of type "
-                                         << object->GetResourceClassName () << ".";
+                                         << object->GetResourceClassName () << ".");
             }
             else
             {
-                BOOST_LOG_TRIVIAL (info) << "Asset " << iterator->path () << " isn't captured by any plugin.";
+                MT_LOG (info, "Asset " << iterator->path () << " isn't captured by any plugin.");
             }
         }
 
@@ -86,13 +88,13 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
 
 void ObjectManager::ResolveObjectReferences ()
 {
-    BOOST_LOG_TRIVIAL (info) << "Resolving objects outer references...";
+    MT_LOG (info, "Resolving objects outer references...");
     std::unordered_set <unsigned int> usedClassNames;
 
     for (auto &resourceClassObjectMapPair : resourceClassMap_)
     {
-        BOOST_LOG_TRIVIAL (info) << "Resolving outer references for objects of class \"" <<
-                                 resourceClassObjectMapPair.first << "\"...";
+        MT_LOG (info, "Resolving outer references for objects of class \"" <<
+                                 resourceClassObjectMapPair.first << "\"...");
         unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
 
         if (usedClassNames.count (classNameHash))
@@ -107,7 +109,7 @@ void ObjectManager::ResolveObjectReferences ()
 
         for (auto &nameObjectPair : objectNameMap)
         {
-            BOOST_LOG_TRIVIAL (info) << "Resolving outer references for object \"" << nameObjectPair.first << "\"...";
+            MT_LOG (info, "Resolving outer references for object \"" << nameObjectPair.first << "\"...");
             unsigned int objectNameHash = StringHash (nameObjectPair.first);
 
             if (usedObjectNames.count (objectNameHash))
@@ -179,11 +181,11 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
 
     if (output == nullptr)
     {
-        BOOST_LOG_TRIVIAL (fatal) << "Unable to open " << target << " for content list output.";
+        MT_LOG (fatal, "Unable to open " << target << " for content list output.");
         return false;
     }
 
-    BOOST_LOG_TRIVIAL (info) << "Generating " << target << "...";
+    MT_LOG (info, "Generating " << target << "...");
     size_t sizeContainer = existingHashes.size ();
     fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
 
@@ -204,7 +206,7 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
     }
 
     fclose (output);
-    BOOST_LOG_TRIVIAL (info) << "Done " << target << " generation.";
+    MT_LOG (info, "Done " << target << " generation.");
     return true;
 }
 
@@ -224,9 +226,9 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
             {
                 if (!object->Execute (classOutputFolder))
                 {
-                    BOOST_LOG_TRIVIAL (fatal) << "Unable to write object \"" << object->GetUniqueName () <<
+                    MT_LOG (fatal, "Unable to write object \"" << object->GetUniqueName () <<
                                               "\" of type \"" << resourceClassObjectMapPair.first <<
-                                              "\" because of internal error.";
+                                              "\" because of internal error.");
                     return false;
                 }
             }

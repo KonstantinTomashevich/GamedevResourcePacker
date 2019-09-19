@@ -2,7 +2,9 @@
 #include <cstdlib>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/log/trivial.hpp>
+
 #include <Core/Exception.hpp>
+#include <Shared/MultithreadedLog.hpp>
 
 namespace GamedevResourcePacker
 {
@@ -66,7 +68,7 @@ void DataClass::LoadFromTree (boost::property_tree::ptree &tree)
     }
     catch (boost::exception &exception)
     {
-        BOOST_LOG_TRIVIAL (fatal) << "Exception caught: " << boost::diagnostic_information (exception);
+        MT_LOG (fatal, "Exception caught: " << boost::diagnostic_information (exception));
         BOOST_THROW_EXCEPTION (Exception <XMLParseException> ("Unable to parse xml because of boost error!"));
     }
 }
@@ -162,7 +164,7 @@ std::string DataClass::GenerateSetterCxxType (const DataClass::Field &field) con
 void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) const
 {
     boost::filesystem::path headerPath = outputFolder / (name_ + ".hpp");
-    BOOST_LOG_TRIVIAL (info) << "Generating  " << headerPath << "...";
+    MT_LOG (info, "Generating  " << headerPath << "...");
     std::ofstream header (headerPath.string ());
 
     header << "#pragma once" << std::endl <<
@@ -192,7 +194,7 @@ void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) con
     header << "};" << std::endl << "}" << std::endl << "}" << std::endl;
 
     header.close ();
-    BOOST_LOG_TRIVIAL (info) << "Done " << headerPath << " generation.";
+    MT_LOG (info, "Done " << headerPath << " generation.");
 }
 
 void DataClass::GenerateHeaderAccessors (std::ofstream &header) const
@@ -261,7 +263,7 @@ void DataClass::GenerateHeaderFields (std::ofstream &header) const
 void DataClass::GenerateObject (const boost::filesystem::path &outputFolder) const
 {
     boost::filesystem::path objectPath = outputFolder / (name_ + ".cpp");
-    BOOST_LOG_TRIVIAL (info) << "Generating  " << objectPath << "...";
+    MT_LOG (info, "Generating  " << objectPath << "...");
     std::ofstream object (objectPath.string ());
 
     object << "#include \"" << name_ << ".hpp\"" << std::endl <<
@@ -280,7 +282,7 @@ void DataClass::GenerateObject (const boost::filesystem::path &outputFolder) con
 
     object << "}" << std::endl << "}" << std::endl;
     object.close ();
-    BOOST_LOG_TRIVIAL (info) << "Done " << objectPath << " generation.";
+    MT_LOG (info, "Done " << objectPath << " generation.");
 }
 
 void DataClass::GenerateObjectIncludes (std::ofstream &object) const

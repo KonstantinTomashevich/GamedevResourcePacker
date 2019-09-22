@@ -15,7 +15,9 @@ DataObject::DataObject (const std::string &name, const boost::filesystem::path &
                         PluginAPI *owner, DataClassProvider *provider)
     : Object (owner, name, rootName), rootField_ (new DataObjectValueField (provider, rootName, root))
 {
-    generationTargets_.push_back (std::to_string (StringHash (GetUniqueName ())));
+    generationTargets_.push_back (std::to_string (StringHash (GetUniqueName ())) + "." +
+        std::to_string (StringHash (GetResourceClassName ())));
+
     generationDependencies_.push_back (sourceAsset);
     rootField_->IterateOuterReferences ([this] (ObjectReference *reference)
                                         { AddOuterReference (reference, false); });
@@ -39,15 +41,16 @@ bool DataObject::NeedsExecution (const boost::filesystem::path &outputFolder) co
 
 bool DataObject::Execute (const boost::filesystem::path &outputFolder) const
 {
-    boost::filesystem::path target = outputFolder / std::to_string (StringHash (GetUniqueName ()));
+    // TODO: Refactor generation targets system. It'll be easier to expand if there is only one target.
+    boost::filesystem::path target = outputFolder / generationTargets_[0];
     MT_LOG (info, "Generation " << target << "...");
     FILE *output = fopen (target.string ().c_str (), "wb");
 
     if (output == nullptr)
     {
         MT_LOG (fatal, "Unable to open " << target << " for object \"" <<
-                                  GetUniqueName () << "\" of type \"" <<
-                                  GetResourceClassName () << "\" binary output.");
+                                         GetUniqueName () << "\" of type \"" <<
+                                         GetResourceClassName () << "\" binary output.");
         return false;
     }
 

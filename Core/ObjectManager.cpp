@@ -209,6 +209,7 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
     size_t sizeContainer = existingHashes.size ();
     fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
 
+    // TODO: Content list must contain information about how to load assets properly.
     for (auto &nameHashHashSetPair : existingHashes)
     {
         unsigned int classNameHash = nameHashHashSetPair.first;
@@ -235,11 +236,7 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
     std::vector <const Object *> plainObjectList;
     for (auto &resourceClassObjectMapPair : resourceClassMap_)
     {
-        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
-        boost::filesystem::path classOutputFolder = rootOutputFolder / std::to_string (classNameHash);
-        boost::filesystem::create_directories (classOutputFolder);
         const ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
-
         for (auto &nameObjectPair : objectNameMap)
         {
             const Object *object = nameObjectPair.second;
@@ -252,13 +249,9 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
     for (int index = 0; index < plainObjectList.size (); ++index)
     {
         const Object * object = plainObjectList[index];
-        // TODO: Maybe stop creating separate dirs for resource classes?
-        unsigned int classNameHash = StringHash (object->GetResourceClassName ());
-        boost::filesystem::path classOutputFolder = rootOutputFolder / std::to_string (classNameHash);
-
-        if (object->NeedsExecution (classOutputFolder))
+        if (object->NeedsExecution (rootOutputFolder))
         {
-            if (!object->Execute (classOutputFolder))
+            if (!object->Execute (rootOutputFolder))
             {
                 MT_LOG (fatal, "Unable to write object \"" << object->GetUniqueName () <<
                                                            "\" of type \"" << object->GetResourceClassName () <<

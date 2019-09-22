@@ -38,6 +38,7 @@ void Init (const boost::filesystem::path &assetFolder)
         CheckedFileRead <BrokenContentList> (&groupId, sizeof (groupId), 1, contentList,
                                              "Unable to read group hash!");
 
+        BOOST_LOG_TRIVIAL (info) << "ResourceSubsystem: Found group " << groupId << ".";
         auto insertionResult = groups_.insert (std::make_pair (groupId, Group {RuntimeGroup (groupId), {}}));
         if (!insertionResult.second)
         {
@@ -45,19 +46,20 @@ void Init (const boost::filesystem::path &assetFolder)
                 std::to_string (groupId) + "."));
         }
 
-        boost::filesystem::path groupFolder = assetFolder / std::to_string (groupId);
         Group &group = insertionResult.first->second;
         size_t groupSize;
-
         CheckedFileRead <BrokenContentList> (&groupSize, sizeof (groupSize), 1, contentList,
                                              "Unable to read group size!");
+
         for (int objectIndex = 0; objectIndex < groupSize; ++objectIndex)
         {
             unsigned int objectId;
             CheckedFileRead <BrokenContentList> (&objectId, sizeof (objectId), 1, contentList,
                                                  "Unable to read object hash!");
 
-            boost::filesystem::path loadPath = groupFolder / std::to_string (objectId);
+            boost::filesystem::path loadPath = assetFolder / (
+                std::to_string (objectId) + "." + std::to_string (groupId));
+
             if (!group.loadPaths.insert (std::make_pair (objectId, loadPath.string ())).second)
             {
                 BOOST_THROW_EXCEPTION (Exception <BrokenContentList> ("Found object with duplicate hash " +
@@ -99,7 +101,7 @@ Object *GetResource (Loader loader, unsigned int group, unsigned int id)
     }
     catch (std::out_of_range &exception)
     {
-        BOOST_THROW_EXCEPTION (Exception <GroupNotExists> ("Group " + std::to_string (group) + "not found!"));
+        BOOST_THROW_EXCEPTION (Exception <GroupNotExists> ("Group " + std::to_string (group) + " not found!"));
     }
 }
 

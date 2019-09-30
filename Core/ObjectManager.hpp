@@ -36,9 +36,14 @@ private:
     void ResolveObjectReference (ObjectReference *reference);
     bool WriteContentList (const boost::filesystem::path &outputFolder);
     bool WriteObjects (const boost::filesystem::path &rootOutputFolder) const;
+
     bool IsContentListChanged (const boost::filesystem::path &contentListPath,
                                const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
                                existingHashes) const;
+
+    boost::filesystem::path GetObjectOutputPath (const boost::filesystem::path &rootOutputFolder,
+        const Object *object) const;
+
 
     ResourceClassMap resourceClassMap_;
     bool contentListOverwritten_;

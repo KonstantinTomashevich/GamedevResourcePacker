@@ -4,13 +4,13 @@
 #include <vector>
 #include <cstdio>
 #include "ObjectReference.hpp"
-#include "GenerationTask.hpp"
+#include "BinaryGenerationTask.hpp"
 
 namespace GamedevResourcePacker
 {
 class PluginAPI;
 
-class BOOST_SYMBOL_EXPORT Object : public GenerationTask
+class BOOST_SYMBOL_EXPORT Object : public BinaryGenerationTask
 {
 public:
     virtual ~Object ();

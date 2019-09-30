@@ -245,18 +245,38 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
     }
 
     bool failed = false;
+    std::unordered_map <std::string, FILE *> outputs;
+
 #pragma omp parallel for
     for (int index = 0; index < plainObjectList.size (); ++index)
     {
-        const Object * object = plainObjectList[index];
-        if (object->NeedsExecution (rootOutputFolder))
+        const Object *object = plainObjectList[index];
+        boost::filesystem::path outputFile = GetObjectOutputPath (rootOutputFolder, object);
+
+        if (object->NeedsExecution (outputFile))
         {
-            if (!object->Execute (rootOutputFolder))
+            FILE *output = fopen (outputFile.string ().c_str (), "wb");
+            if (!output)
+            {
+                MT_LOG (fatal, "Unable to open " << outputFile << " for object \"" <<
+                                                 object->GetUniqueName () << "\" of type \"" <<
+                                                 object->GetResourceClassName () << "\" binary output.");
+                failed = true;
+            }
+
+            MT_LOG (info, "Generating " << outputFile << "...");
+            if (!failed && !object->Execute (output))
             {
                 MT_LOG (fatal, "Unable to write object \"" << object->GetUniqueName () <<
                                                            "\" of type \"" << object->GetResourceClassName () <<
                                                            "\" because of internal error.");
                 failed = true;
+            }
+
+            if (!failed)
+            {
+                MT_LOG (info, "Done " << outputFile << " generation...");
+                fclose (output);
             }
         }
     }
@@ -307,5 +327,13 @@ bool ObjectManager::IsContentListChanged (const boost::filesystem::path &content
 
     fclose (contentList);
     return existingHashes != foundHashes;
+}
+
+boost::filesystem::path ObjectManager::GetObjectOutputPath (const boost::filesystem::path &rootOutputFolder,
+                                                            const Object *object) const
+{
+    return rootOutputFolder /
+        (std::to_string (StringHash (object->GetUniqueName ())) + "." +
+            (std::to_string (StringHash (object->GetResourceClassName ()))));
 }
 }

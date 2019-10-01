@@ -209,7 +209,6 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
     size_t sizeContainer = existingHashes.size ();
     fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
 
-    // TODO: Content list must contain information about how to load assets properly.
     for (auto &nameHashHashSetPair : existingHashes)
     {
         unsigned int classNameHash = nameHashHashSetPair.first;
@@ -222,7 +221,14 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
         for (auto &hash : objectsHashSet)
         {
             unsigned int objectNameHash = hash;
+            std::string assetFile = GetObjectOutputFileName (objectNameHash, classNameHash);
+            unsigned int assetFileStringSize = assetFile.size ();
+            unsigned int offset = 0;
+
             fwrite (&objectNameHash, sizeof (objectNameHash), 1, output);
+            fwrite (&assetFileStringSize, sizeof (assetFileStringSize), 1, output);
+            fwrite (assetFile.c_str (), sizeof (char), assetFileStringSize, output);
+            fwrite (&offset, sizeof (offset), 1, output);
         }
     }
 
@@ -332,8 +338,12 @@ bool ObjectManager::IsContentListChanged (const boost::filesystem::path &content
 boost::filesystem::path ObjectManager::GetObjectOutputPath (const boost::filesystem::path &rootOutputFolder,
                                                             const Object *object) const
 {
-    return rootOutputFolder /
-        (std::to_string (StringHash (object->GetUniqueName ())) + "." +
-            (std::to_string (StringHash (object->GetResourceClassName ()))));
+    return rootOutputFolder / GetObjectOutputFileName (
+        StringHash (object->GetUniqueName ()), StringHash (object->GetResourceClassName ()));
+}
+
+std::string ObjectManager::GetObjectOutputFileName (unsigned int objectId, unsigned int classId) const
+{
+    return std::to_string (objectId) + "." + std::to_string (classId);
 }
 }

@@ -9,10 +9,23 @@
 
 namespace ResourceSubsystem
 {
+class LoadPath
+{
+public:
+    LoadPath (const std::string &fileName, unsigned int offset)
+        : fileName_ (fileName), offset_ (offset)
+    {
+
+    }
+
+    std::string fileName_;
+    unsigned int offset_;
+};
+
 typedef struct
 {
     RuntimeGroup runtime;
-    std::unordered_map <unsigned int, std::string> loadPaths;
+    std::unordered_map <unsigned int, LoadPath> loadPaths;
 } Group;
 
 static std::unordered_map <unsigned int, Group> groups_;
@@ -54,13 +67,23 @@ void Init (const boost::filesystem::path &assetFolder)
         for (int objectIndex = 0; objectIndex < groupSize; ++objectIndex)
         {
             unsigned int objectId;
+            unsigned int fileNameSize;
+            std::string fileName;
+            unsigned int offset;
+
             CheckedFileRead <BrokenContentList> (&objectId, sizeof (objectId), 1, contentList,
                                                  "Unable to read object hash!");
+            CheckedFileRead <BrokenContentList> (&fileNameSize, sizeof (fileNameSize), 1, contentList,
+                                                 "Unable to read file name size!");
 
-            boost::filesystem::path loadPath = assetFolder / (
-                std::to_string (objectId) + "." + std::to_string (groupId));
+            fileName.resize (fileNameSize);
+            CheckedFileRead <BrokenContentList> (&fileName[0], sizeof (char), fileNameSize, contentList,
+                                                 "Unable to read file name!");
+            CheckedFileRead <BrokenContentList> (&offset, sizeof (offset), 1, contentList,
+                                                 "Unable to read offset!");
 
-            if (!group.loadPaths.insert (std::make_pair (objectId, loadPath.string ())).second)
+            boost::filesystem::path loadPath = assetFolder / fileName;
+            if (!group.loadPaths.insert (std::make_pair (objectId, LoadPath (loadPath.string (), offset))).second)
             {
                 BOOST_THROW_EXCEPTION (Exception <BrokenContentList> ("Found object with duplicate hash " +
                     std::to_string (objectId) + " in group " + std::to_string (groupId) + "."));
@@ -89,7 +112,7 @@ Object *GetResource (Loader loader, unsigned int group, unsigned int id)
             BOOST_THROW_EXCEPTION (Exception <ObjectNotExists> ("Object " + std::to_string (id) + "not found!"));
         }
 
-        object = loader (id, loadPathInfo->second);
+        object = loader (id, loadPathInfo->second.fileName_, loadPathInfo->second.offset_);
         if (object == nullptr)
         {
             BOOST_THROW_EXCEPTION (Exception <LoadedObjectIsNull> ("Loaded object is null!"));

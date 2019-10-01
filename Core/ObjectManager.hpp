@@ -43,6 +43,7 @@ private:
 
     boost::filesystem::path GetObjectOutputPath (const boost::filesystem::path &rootOutputFolder,
         const Object *object) const;
+    std::string GetObjectOutputFileName (unsigned int objectId, unsigned int classId) const;
 
 
     ResourceClassMap resourceClassMap_;

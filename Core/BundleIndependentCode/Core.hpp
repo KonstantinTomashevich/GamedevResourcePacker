@@ -5,7 +5,7 @@
 
 namespace ResourceSubsystem
 {
-typedef Object *(*Loader) (int id, const boost::filesystem::path &);
+typedef Object *(*Loader) (int id, const std::string &, unsigned int offset);
 void Init (const boost::filesystem::path &assetFolder);
 Object *GetResource (Loader loader, unsigned int group, unsigned int id);
 

@@ -167,9 +167,10 @@ void PluginAPI::GenerateLoadersCode (const boost::filesystem::path &output) cons
     loaders << std::endl << "namespace ResourceSubsystem" << std::endl << "{" << std::endl <<
             "namespace DataObjects" << std::endl << "{" << std::endl <<
             "template <typename T> Object *DataObjectLoader ("
-            "int id, const boost::filesystem::path &path)" << std::endl <<
+            "int id, const std::string &path, unsigned int offset)" << std::endl <<
             "{" << std::endl <<
-            "    FILE *input = fopen (path.string ().c_str (), \"rb\");" << std::endl <<
+            "    FILE *input = fopen (path.c_str (), \"rb\");" << std::endl <<
+            "    fseek (input, offset, SEEK_SET);" << std::endl <<
             "    T *object = new T (id, input);" << std::endl <<
             "    fclose (input);" << std::endl <<
             "    return object;" << std::endl <<

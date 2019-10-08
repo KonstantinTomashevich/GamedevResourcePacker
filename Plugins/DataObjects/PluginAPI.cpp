@@ -10,7 +10,7 @@ namespace GamedevResourcePacker
 namespace DataObjectsPlugin
 {
 using Path = boost::filesystem::path;
-using DirIterator = boost::filesystem::directory_iterator;
+using RecursiveDirIterator = boost::filesystem::recursive_directory_iterator;
 
 const char *PluginAPI::GetName () const
 {
@@ -20,8 +20,8 @@ const char *PluginAPI::GetName () const
 bool PluginAPI::Load (const Path &configFolder)
 {
     Path classesFolder = configFolder / "DataObjectClasses";
-    DirIterator iterator (classesFolder);
-    DirIterator end;
+    RecursiveDirIterator iterator (classesFolder);
+    RecursiveDirIterator end;
 
     // TODO: Is it worth multithreading?
     while (iterator != end)

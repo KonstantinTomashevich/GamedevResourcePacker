@@ -39,7 +39,7 @@ private:
 
     bool IsContentListChanged (const boost::filesystem::path &contentListPath,
                                const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
-                               existingHashes) const;
+                               existingHashes);
 
     boost::filesystem::path GetObjectOutputPath (const boost::filesystem::path &rootOutputFolder,
         const Object *object) const;
@@ -48,5 +48,6 @@ private:
 
     ResourceClassMap resourceClassMap_;
     bool contentListOverwritten_;
+    bool repackerDetected_;
 };
 }

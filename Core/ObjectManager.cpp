@@ -14,7 +14,7 @@ namespace GamedevResourcePacker
 using DirRecursiveIterator = boost::filesystem::recursive_directory_iterator;
 
 ObjectManager::ObjectManager ()
-    : resourceClassMap_ (), contentListOverwritten_ (false)
+    : resourceClassMap_ (), contentListOverwritten_ (false), repackerDetected_ (false)
 {
 
 }
@@ -259,7 +259,7 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
         const Object *object = plainObjectList[index];
         boost::filesystem::path outputFile = GetObjectOutputPath (rootOutputFolder, object);
 
-        if (object->NeedsExecution (outputFile))
+        if (repackerDetected_ || object->NeedsExecution (outputFile))
         {
             FILE *output = fopen (outputFile.string ().c_str (), "wb");
             if (!output)
@@ -292,7 +292,7 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
 
 bool ObjectManager::IsContentListChanged (const boost::filesystem::path &contentListPath,
                                           const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
-                                          existingHashes) const
+                                          existingHashes)
 {
     if (!boost::filesystem::exists (contentListPath))
     {
@@ -328,6 +328,25 @@ bool ObjectManager::IsContentListChanged (const boost::filesystem::path &content
             unsigned int objectId;
             fread (&objectId, sizeof (objectId), 1, contentList);
             foundHashes[groupId].insert (objectId);
+
+            unsigned int pathSize;
+            std::string assetFile;
+            fread (&pathSize, sizeof (pathSize), 1, contentList);
+
+            assetFile.resize (pathSize);
+            fread (&assetFile[0], sizeof (char), pathSize, contentList);
+            std::string expectedAssetFile = GetObjectOutputFileName (objectId, groupId);
+
+            unsigned int offset;
+            fread (&offset, sizeof (offset), 1, contentList);
+
+            if (offset != 0 || expectedAssetFile != assetFile)
+            {
+                // If assets were repacked, we should overwrite them.
+                repackerDetected_ = true;
+                fclose (contentList);
+                return false;
+            }
         }
     }
 

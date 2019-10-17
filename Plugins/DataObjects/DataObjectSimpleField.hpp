@@ -28,7 +28,7 @@ public:
         return true;
     }
 
-    virtual void Print (std::ostream &output, int indentation = 0) const
+    virtual void Print (std::ostream &output, int32_t indentation = 0) const
     {
         Indent (output, indentation) << "(simple field) " << value_ << std::endl;
     }
@@ -55,13 +55,13 @@ public:
 
     virtual bool Write (FILE *output)
     {
-        size_t size = value_.size ();
+        uint32_t size = value_.size ();
         fwrite (&size, sizeof (size), 1, output);
         fwrite (value_.c_str (), sizeof (char), size, output);
         return true;
     }
 
-    virtual void Print (std::ostream &output, int indentation = 0) const
+    virtual void Print (std::ostream &output, int32_t indentation = 0) const
     {
         Indent (output, indentation) << "(simple field) \"" << value_ << "\"" << std::endl;
     }
@@ -70,7 +70,7 @@ private:
     std::string value_;
 };
 
-using DataObjectIntField = DataObjectSimpleField <int>;
+using DataObjectIntField = DataObjectSimpleField <int32_t>;
 using DataObjectFloatField = DataObjectSimpleField <float>;
 using DataObjectStringField = DataObjectSimpleField <std::string>;
 }

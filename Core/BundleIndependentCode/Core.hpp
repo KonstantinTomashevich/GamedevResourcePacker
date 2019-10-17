@@ -5,11 +5,11 @@
 
 namespace ResourceSubsystem
 {
-typedef Object *(*Loader) (int id, const std::string &, unsigned int offset);
+typedef Object *(*Loader) (int32_t id, const std::string &, uint32_t offset);
 void Init (const boost::filesystem::path &assetFolder);
-Object *GetResource (Loader loader, unsigned int group, unsigned int id);
+Object *GetResource (Loader loader, uint32_t group, uint32_t id);
 
-RuntimeGroup *GetRuntimeGroup (unsigned int group) noexcept;
+RuntimeGroup *GetRuntimeGroup (uint32_t group) noexcept;
 void DisposeAllUnused () noexcept;
 
 // Exception classes.

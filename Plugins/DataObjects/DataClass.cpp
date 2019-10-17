@@ -85,6 +85,10 @@ std::string DataClass::GenerateCxxFieldType (const DataClass::Field &field) cons
     {
         result += "std::string";
     }
+    else if (field.typeName == "int")
+    {
+        result += "int32_t";
+    }
     else
     {
         result += field.typeName;
@@ -186,7 +190,7 @@ void DataClass::GenerateHeader (const boost::filesystem::path &outputFolder) con
            "public:" << std::endl <<
            "    /// Stub constructor for std::vector, do not use!" << std::endl <<
            "    " << name_ << "() : Object (PRIVATE_OBJECT_ID) {}" << std::endl <<
-           "    " << name_ << " (int id, FILE *stream);" << std::endl <<
+           "    " << name_ << " (int32_t id, FILE *stream);" << std::endl <<
            "    virtual ~" << name_ << " ();" << std::endl << std::endl;
 
     GenerateHeaderAccessors (header);
@@ -324,7 +328,7 @@ void DataClass::GenerateObjectAccessors (std::ofstream &object) const
 
 void DataClass::GenerateObjectConstructor (std::ofstream &object) const
 {
-    object << name_ << "::" << name_ << " (int id, FILE *stream)" << std::endl <<
+    object << name_ << "::" << name_ << " (int32_t id, FILE *stream)" << std::endl <<
            "    : Object (id)";
 
     for (auto &field : fields_)
@@ -378,10 +382,10 @@ void DataClass::GenerateObjectDestructor (std::ofstream &object) const
 
 void DataClass::InsertArrayReader (std::ofstream &object, const DataClass::Field &field) const
 {
-    object << "    int " << field.name << "Count;" << std::endl <<
+    object << "    int32_t " << field.name << "Count;" << std::endl <<
            "    fread (&" << field.name << "Count, sizeof (" << field.name << "Count), 1, stream);" << std::endl <<
            "    " << field.name << "_.resize (" << field.name << "Count);" << std::endl << std::endl <<
-           "    for (int index = 0; index < " << field.name << "Count; ++index)" << std::endl <<
+           "    for (int32_t index = 0; index < " << field.name << "Count; ++index)" << std::endl <<
            "    {" << std::endl;
 
     InsertValueReader (object, field, "        ");
@@ -395,7 +399,7 @@ void DataClass::InsertValueReader (std::ofstream &object,
     std::string outputName = (field.array ? field.name + "_[index]" : field.name + "_");
     if (field.typeName == "string")
     {
-        object << indentation << "int " << field.name << "Size;" << std::endl <<
+        object << indentation << "uint32_t " << field.name << "Size;" << std::endl <<
                indentation << "fread (&" << field.name << "Size, sizeof (" << field.name << "Size), 1, stream);" <<
                std::endl << indentation << outputName << ".resize (" << field.name << "Size);" << std::endl <<
                indentation << "fread (&" << outputName << "[0], sizeof (char), " << field.name << "Size, stream);" <<
@@ -409,8 +413,8 @@ void DataClass::InsertValueReader (std::ofstream &object,
     else if (field.reference)
     {
         // TODO: References should use some kind of weak refs to avoid possible crashes on multiple deletions with incorrect order.
-        object << indentation << "unsigned int " << field.name << "GroupId;" << std::endl <<
-               indentation << "unsigned int " << field.name << "ObjectId;" << std::endl << std::endl <<
+        object << indentation << "uint32_t " << field.name << "GroupId;" << std::endl <<
+               indentation << "uint32_t " << field.name << "ObjectId;" << std::endl << std::endl <<
                indentation << "fread (&" << field.name << "GroupId, sizeof (" << field.name << "GroupId), 1, stream);"
                << std::endl << indentation << "fread (&" << field.name << "ObjectId, sizeof (" << field.name <<
                "ObjectId), 1, stream);" << std::endl <<

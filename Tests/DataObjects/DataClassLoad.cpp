@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(DataClassLoadCorrect)
     BOOST_TEST_MESSAGE ("Fields count: " << fields.size ());
     BOOST_TEST_CHECK (fields.size () == 5);
 
-    for (int index = 0; index < fields.size (); ++index)
+    for (int32_t index = 0; index < fields.size (); ++index)
     {
         DataClass::Field field = fields[index];
         BOOST_TEST_MESSAGE ("Field #" << index << ": " << (field.readonly ? "readonly" : "readwrite") <<

@@ -5,5 +5,5 @@
 namespace GamedevResourcePacker
 {
 /// Classic SDBM string hash.
-BOOST_SYMBOL_EXPORT unsigned int StringHash (const std::string &str);
+BOOST_SYMBOL_EXPORT uint32_t StringHash (const std::string &str);
 }

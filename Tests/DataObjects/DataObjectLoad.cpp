@@ -27,7 +27,8 @@ BOOST_AUTO_TEST_CASE(DataObjectLoadCorect)
     {
         BOOST_TEST_MESSAGE ("Loading Object xml file...");
         boost::property_tree::ptree tree;
-        boost::property_tree::read_xml ((xmlPath / "Object.xml").string (), tree);
+        boost::filesystem::path rootAsset = xmlPath / "Object.xml";
+        boost::property_tree::read_xml (rootAsset.string (), tree);
         auto xmlRoot = tree.get_child ("data-object");
 
         auto name = xmlRoot.get_child ("<xmlattr>.name");
@@ -45,7 +46,7 @@ BOOST_AUTO_TEST_CASE(DataObjectLoadCorect)
         }
 
         BOOST_TEST_MESSAGE ("Parsing object...");
-        DataObject object (name.data (), rootObjectName, rootObject, nullptr, &provider);
+        DataObject object (name.data (), rootAsset, rootObjectName, rootObject, nullptr, &provider);
 
         BOOST_TEST_MESSAGE ("Converting object to string...");
         std::ostringstream osstream;

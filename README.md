@@ -60,13 +60,13 @@ Resource object represents a single assets unit, that will be processed (and use
 ```
 N - resource classes count (std::size_t)
 N times:
-    class name hash (unsigned integer)
+    class name hash (uint32_t)
     M - class instance count (std::size_t)
     M - times:
-        object name hash (unsigned integer)
-        K - object file path string length (unsigned integer)
+        object name hash (uint32_t)
+        K - object file path string length (uint32_t)
         object file path string (K bytes)
-        object data offset in file (unsigned integer)
+        object data offset in file (uint32_t)
 ```
 
 You can figure, that this content list structure allows you to repack assets as you need without editing generated code.

@@ -2,9 +2,9 @@
 
 namespace GamedevResourcePacker
 {
-unsigned int StringHash (const std::string &str)
+uint32_t StringHash (const std::string &str)
 {
-    unsigned int hash = 0;
+    uint32_t hash = 0;
     const char *cStr = str.c_str ();
     while (*cStr)
     {

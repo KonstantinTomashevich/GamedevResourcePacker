@@ -12,23 +12,23 @@ namespace ResourceSubsystem
 class LoadPath
 {
 public:
-    LoadPath (const std::string &fileName, unsigned int offset)
+    LoadPath (const std::string &fileName, uint32_t offset)
         : fileName_ (fileName), offset_ (offset)
     {
 
     }
 
     std::string fileName_;
-    unsigned int offset_;
+    uint32_t offset_;
 };
 
 typedef struct
 {
     RuntimeGroup runtime;
-    std::unordered_map <unsigned int, LoadPath> loadPaths;
+    std::unordered_map <uint32_t, LoadPath> loadPaths;
 } Group;
 
-static std::unordered_map <unsigned int, Group> groups_;
+static std::unordered_map <uint32_t, Group> groups_;
 
 void Init (const boost::filesystem::path &assetFolder)
 {
@@ -45,9 +45,9 @@ void Init (const boost::filesystem::path &assetFolder)
                                          "Unable to read group count!");
 
     BOOST_LOG_TRIVIAL (info) << "ResourceSubsystem: Found " << groupCount << " groups.";
-    for (int groupIndex = 0; groupIndex < groupCount; ++groupIndex)
+    for (int32_t groupIndex = 0; groupIndex < groupCount; ++groupIndex)
     {
-        unsigned int groupId;
+        uint32_t groupId;
         CheckedFileRead <BrokenContentList> (&groupId, sizeof (groupId), 1, contentList,
                                              "Unable to read group hash!");
 
@@ -64,12 +64,12 @@ void Init (const boost::filesystem::path &assetFolder)
         CheckedFileRead <BrokenContentList> (&groupSize, sizeof (groupSize), 1, contentList,
                                              "Unable to read group size!");
 
-        for (int objectIndex = 0; objectIndex < groupSize; ++objectIndex)
+        for (int32_t objectIndex = 0; objectIndex < groupSize; ++objectIndex)
         {
-            unsigned int objectId;
-            unsigned int fileNameSize;
+            uint32_t objectId;
+            uint32_t fileNameSize;
             std::string fileName;
-            unsigned int offset;
+            uint32_t offset;
 
             CheckedFileRead <BrokenContentList> (&objectId, sizeof (objectId), 1, contentList,
                                                  "Unable to read object hash!");
@@ -94,7 +94,7 @@ void Init (const boost::filesystem::path &assetFolder)
     fclose (contentList);
 }
 
-Object *GetResource (Loader loader, unsigned int group, unsigned int id)
+Object *GetResource (Loader loader, uint32_t group, uint32_t id)
 {
     try
     {
@@ -128,7 +128,7 @@ Object *GetResource (Loader loader, unsigned int group, unsigned int id)
     }
 }
 
-RuntimeGroup *GetRuntimeGroup (unsigned int group) noexcept
+RuntimeGroup *GetRuntimeGroup (uint32_t group) noexcept
 {
     try
     {

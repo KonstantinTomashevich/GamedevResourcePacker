@@ -58,7 +58,7 @@ bool PluginManager::LoadPluginsConfig (const Path &configFolder)
     bool failed = false;
 
 #pragma omp parallel for
-    for (int index = 0; index < plugins_.size (); ++index)
+    for (int32_t index = 0; index < plugins_.size (); ++index)
     {
         auto &plugin = plugins_[index];
         MT_LOG(info, "Loading config of plugin \"" << plugin->GetName () << "\".");

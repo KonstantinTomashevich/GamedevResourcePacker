@@ -19,10 +19,10 @@ public:
 
     virtual void IterateOuterReferences (const ReferenceIterationCallback &callback) = 0;
     virtual bool Write (FILE *output) = 0;
-    virtual void Print (std::ostream &output, int indentation = 0) const = 0;
+    virtual void Print (std::ostream &output, int32_t indentation = 0) const = 0;
 
 protected:
-    static std::ostream &Indent (std::ostream &output, int size);
+    static std::ostream &Indent (std::ostream &output, int32_t size);
 };
 }
 }

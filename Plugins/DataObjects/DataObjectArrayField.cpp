@@ -61,7 +61,7 @@ bool DataObjectArrayField::Write (FILE *output)
     return true;
 }
 
-void DataObjectArrayField::Print (std::ostream &output, int indentation) const
+void DataObjectArrayField::Print (std::ostream &output, int32_t indentation) const
 {
     Indent (output, indentation) << "Array of size " << objects_.size () << std::endl;
     for (DataObjectField *object : objects_)

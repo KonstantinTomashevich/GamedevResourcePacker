@@ -17,7 +17,6 @@
 #define PACKAGING_FATAL_ERROR -3
 #define OUTPUT_FATAL_ERROR -4
 
-// TODO: Don't use int's as it may cause problems with 32bit/64bin conversion!
 namespace GamedevResourcePacker
 {
 int Main (int argCount, char **argValues)

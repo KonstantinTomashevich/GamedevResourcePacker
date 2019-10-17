@@ -75,7 +75,7 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
     // TODO: It will speedup process only if there is a lot of plugins (maybe 10 or more). Think if its useful.
     boost::mutex resourceClassMapInsert;
 #pragma omp parallel for
-    for (int index = 0; index < possibleAssets.size (); ++index)
+    for (int32_t index = 0; index < possibleAssets.size (); ++index)
     {
         boost::filesystem::path &asset = possibleAssets[index];
         MT_LOG (info, "Trying to capture asset " << asset << ".");
@@ -102,12 +102,12 @@ void ObjectManager::ScanAssetsDir (const boost::filesystem::path &assetsFolder,
 void ObjectManager::ResolveObjectReferences ()
 {
     MT_LOG (info, "Resolving objects outer references...");
-    std::unordered_set <unsigned int> usedClassNames;
+    std::unordered_set <uint32_t> usedClassNames;
     std::vector <Object *> plainObjectList;
 
     for (auto &resourceClassObjectMapPair : resourceClassMap_)
     {
-        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
+        uint32_t classNameHash = StringHash (resourceClassObjectMapPair.first);
         if (usedClassNames.count (classNameHash))
         {
             BOOST_THROW_EXCEPTION (Exception <ClassNameHashCollision> ("Hash " + std::to_string (classNameHash) +
@@ -115,12 +115,12 @@ void ObjectManager::ResolveObjectReferences ()
         }
 
         usedClassNames.insert (classNameHash);
-        std::unordered_set <unsigned int> usedObjectNames;
+        std::unordered_set <uint32_t> usedObjectNames;
         ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
 
         for (auto &nameObjectPair : objectNameMap)
         {
-            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+            uint32_t objectNameHash = StringHash (nameObjectPair.first);
 
             if (usedObjectNames.count (objectNameHash))
             {
@@ -136,7 +136,7 @@ void ObjectManager::ResolveObjectReferences ()
 
     // TODO: Does it really speedups process?
 #pragma omp parallel for
-    for (int index = 0; index < plainObjectList.size (); ++index)
+    for (int32_t index = 0; index < plainObjectList.size (); ++index)
     {
         Object *object = plainObjectList[index];
         MT_LOG (info, "Resolving outer references for object \"" << object->GetResourceClassName () << "::" <<
@@ -176,17 +176,17 @@ void ObjectManager::ResolveObjectReference (ObjectReference *reference)
 bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolder)
 {
     boost::filesystem::path target = outputFolder / "content.list";
-    std::unordered_map <unsigned int, std::unordered_set <unsigned int> > existingHashes;
+    std::unordered_map <uint32_t, std::unordered_set <uint32_t> > existingHashes;
 
     for (auto &resourceClassObjectMapPair : resourceClassMap_)
     {
-        unsigned int classNameHash = StringHash (resourceClassObjectMapPair.first);
-        existingHashes.insert (std::make_pair (classNameHash, std::unordered_set <unsigned int> ()));
+        uint32_t classNameHash = StringHash (resourceClassObjectMapPair.first);
+        existingHashes.insert (std::make_pair (classNameHash, std::unordered_set <uint32_t> ()));
         const ObjectNameMap &objectNameMap = resourceClassObjectMapPair.second;
 
         for (auto &nameObjectPair : objectNameMap)
         {
-            unsigned int objectNameHash = StringHash (nameObjectPair.first);
+            uint32_t objectNameHash = StringHash (nameObjectPair.first);
             existingHashes[classNameHash].insert (objectNameHash);
         }
     }
@@ -211,19 +211,19 @@ bool ObjectManager::WriteContentList (const boost::filesystem::path &outputFolde
 
     for (auto &nameHashHashSetPair : existingHashes)
     {
-        unsigned int classNameHash = nameHashHashSetPair.first;
+        uint32_t classNameHash = nameHashHashSetPair.first;
         fwrite (&classNameHash, sizeof (classNameHash), 1, output);
 
-        const std::unordered_set <unsigned int> &objectsHashSet = nameHashHashSetPair.second;
+        const std::unordered_set <uint32_t> &objectsHashSet = nameHashHashSetPair.second;
         sizeContainer = objectsHashSet.size ();
         fwrite (&sizeContainer, sizeof (sizeContainer), 1, output);
 
         for (auto &hash : objectsHashSet)
         {
-            unsigned int objectNameHash = hash;
+            uint32_t objectNameHash = hash;
             std::string assetFile = GetObjectOutputFileName (objectNameHash, classNameHash);
-            unsigned int assetFileStringSize = assetFile.size ();
-            unsigned int offset = 0;
+            uint32_t assetFileStringSize = assetFile.size ();
+            uint32_t offset = 0;
 
             fwrite (&objectNameHash, sizeof (objectNameHash), 1, output);
             fwrite (&assetFileStringSize, sizeof (assetFileStringSize), 1, output);
@@ -254,7 +254,7 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
     std::unordered_map <std::string, FILE *> outputs;
 
 #pragma omp parallel for
-    for (int index = 0; index < plainObjectList.size (); ++index)
+    for (int32_t index = 0; index < plainObjectList.size (); ++index)
     {
         const Object *object = plainObjectList[index];
         boost::filesystem::path outputFile = GetObjectOutputPath (rootOutputFolder, object);
@@ -291,7 +291,7 @@ bool ObjectManager::WriteObjects (const boost::filesystem::path &rootOutputFolde
 }
 
 bool ObjectManager::IsContentListChanged (const boost::filesystem::path &contentListPath,
-                                          const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
+                                          const std::unordered_map <uint32_t, std::unordered_set <uint32_t> > &
                                           existingHashes)
 {
     if (!boost::filesystem::exists (contentListPath))
@@ -313,23 +313,23 @@ bool ObjectManager::IsContentListChanged (const boost::filesystem::path &content
         return true;
     }
 
-    std::unordered_map <unsigned int, std::unordered_set <unsigned int> > foundHashes;
-    for (int groupIndex = 0; groupIndex < groupCount; ++groupIndex)
+    std::unordered_map <uint32_t, std::unordered_set <uint32_t> > foundHashes;
+    for (int32_t groupIndex = 0; groupIndex < groupCount; ++groupIndex)
     {
-        unsigned int groupId;
+        uint32_t groupId;
         fread (&groupId, sizeof (groupId), 1, contentList);
-        foundHashes.insert (std::make_pair (groupId, std::unordered_set <unsigned int> ()));
+        foundHashes.insert (std::make_pair (groupId, std::unordered_set <uint32_t> ()));
 
         size_t groupSize;
         fread (&groupSize, sizeof (groupSize), 1, contentList);
 
-        for (int objectIndex = 0; objectIndex < groupSize; ++objectIndex)
+        for (int32_t objectIndex = 0; objectIndex < groupSize; ++objectIndex)
         {
-            unsigned int objectId;
+            uint32_t objectId;
             fread (&objectId, sizeof (objectId), 1, contentList);
             foundHashes[groupId].insert (objectId);
 
-            unsigned int pathSize;
+            uint32_t pathSize;
             std::string assetFile;
             fread (&pathSize, sizeof (pathSize), 1, contentList);
 
@@ -337,7 +337,7 @@ bool ObjectManager::IsContentListChanged (const boost::filesystem::path &content
             fread (&assetFile[0], sizeof (char), pathSize, contentList);
             std::string expectedAssetFile = GetObjectOutputFileName (objectId, groupId);
 
-            unsigned int offset;
+            uint32_t offset;
             fread (&offset, sizeof (offset), 1, contentList);
 
             if (offset != 0 || expectedAssetFile != assetFile)
@@ -361,7 +361,7 @@ boost::filesystem::path ObjectManager::GetObjectOutputPath (const boost::filesys
         StringHash (object->GetUniqueName ()), StringHash (object->GetResourceClassName ()));
 }
 
-std::string ObjectManager::GetObjectOutputFileName (unsigned int objectId, unsigned int classId) const
+std::string ObjectManager::GetObjectOutputFileName (uint32_t objectId, uint32_t classId) const
 {
     return std::to_string (objectId) + "." + std::to_string (classId);
 }

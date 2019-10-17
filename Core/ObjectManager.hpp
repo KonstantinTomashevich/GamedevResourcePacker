@@ -38,12 +38,12 @@ private:
     bool WriteObjects (const boost::filesystem::path &rootOutputFolder) const;
 
     bool IsContentListChanged (const boost::filesystem::path &contentListPath,
-                               const std::unordered_map <unsigned int, std::unordered_set <unsigned int> > &
+                               const std::unordered_map <uint32_t, std::unordered_set <uint32_t> > &
                                existingHashes);
 
     boost::filesystem::path GetObjectOutputPath (const boost::filesystem::path &rootOutputFolder,
         const Object *object) const;
-    std::string GetObjectOutputFileName (unsigned int objectId, unsigned int classId) const;
+    std::string GetObjectOutputFileName (uint32_t objectId, uint32_t classId) const;
 
 
     ResourceClassMap resourceClassMap_;

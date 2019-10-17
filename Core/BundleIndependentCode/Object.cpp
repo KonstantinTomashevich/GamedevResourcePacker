@@ -3,13 +3,13 @@
 
 namespace ResourceSubsystem
 {
-Object::Object (int id) noexcept
+Object::Object (int32_t id) noexcept
     : id_ (id), group_ (nullptr), refCount_ (0)
 {
 
 }
 
-unsigned int Object::GetId () const noexcept
+uint32_t Object::GetId () const noexcept
 {
     return id_;
 }
@@ -24,7 +24,7 @@ void Object::SetGroup (RuntimeGroup *group) noexcept
     group_ = group;
 }
 
-int Object::GetRefCount () const noexcept
+int32_t Object::GetRefCount () const noexcept
 {
     return refCount_;
 }

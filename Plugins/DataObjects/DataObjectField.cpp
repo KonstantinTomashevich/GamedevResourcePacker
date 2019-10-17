@@ -10,9 +10,9 @@ DataObjectField::~DataObjectField ()
 
 }
 
-std::ostream &DataObjectField::Indent (std::ostream &output, int size)
+std::ostream &DataObjectField::Indent (std::ostream &output, int32_t size)
 {
-    for (int index = 0; index < size; ++index)
+    for (int32_t index = 0; index < size; ++index)
     {
         output.put (' ');
     }

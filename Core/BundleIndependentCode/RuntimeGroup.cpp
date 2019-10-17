@@ -2,7 +2,7 @@
 
 namespace ResourceSubsystem
 {
-RuntimeGroup::RuntimeGroup (unsigned int id) noexcept
+RuntimeGroup::RuntimeGroup (uint32_t id) noexcept
     : id_ (id), used_ (), unused_ ()
 {
 
@@ -17,12 +17,12 @@ RuntimeGroup::~RuntimeGroup ()
     }
 }
 
-unsigned int RuntimeGroup::GetId () const noexcept
+uint32_t RuntimeGroup::GetId () const noexcept
 {
     return id_;
 }
 
-Object *RuntimeGroup::Query (unsigned int id) const noexcept
+Object *RuntimeGroup::Query (uint32_t id) const noexcept
 {
     try
     {

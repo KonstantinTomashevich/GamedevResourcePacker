@@ -26,7 +26,7 @@ void CodeGenerator::Generate (const boost::filesystem::path &outputFolder) const
 
     bool anyCodeChanged = false;
 #pragma omp parallel for
-    for (int index = 0; index < tasks.size (); ++index)
+    for (int32_t index = 0; index < tasks.size (); ++index)
     {
         auto &task = tasks[index];
         if (task->NeedsExecution (outputFolder))
@@ -82,7 +82,7 @@ void CodeGenerator::CopyBundleIndependentCode (const boost::filesystem::path &ou
     }
 
 #pragma omp parallel for
-    for (int index = 0; index < filesToCopy.size (); ++index)
+    for (int32_t index = 0; index < filesToCopy.size (); ++index)
     {
         boost::filesystem::path &file = filesToCopy[index].first;
         boost::filesystem::path &output = filesToCopy[index].second;
@@ -107,14 +107,14 @@ void CodeGenerator::GenerateIdsHeader (const boost::filesystem::path &idsHeaderP
 
     for (auto &classNameObjectsPair : objectManager_->GetResourceClassMap ())
     {
-        idsHeader << "unsigned int " << classNameObjectsPair.first << "GroupId = " <<
+        idsHeader << "uint32_t " << classNameObjectsPair.first << "GroupId = " <<
                   StringHash (classNameObjectsPair.first) << ";" << std::endl <<
                   "namespace " << classNameObjectsPair.first << std::endl <<
                   "{" << std::endl;
 
         for (auto &objectNameInstancePair : classNameObjectsPair.second)
         {
-            idsHeader << "unsigned int " << objectNameInstancePair.first << " = " <<
+            idsHeader << "uint32_t " << objectNameInstancePair.first << " = " <<
                       StringHash (objectNameInstancePair.first) << ";" << std::endl;
         }
 

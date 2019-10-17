@@ -92,7 +92,7 @@ bool DataObjectValueField::Write (FILE *output)
     return true;
 }
 
-void DataObjectValueField::Print (std::ostream &output, int indentation) const
+void DataObjectValueField::Print (std::ostream &output, int32_t indentation) const
 {
     Indent (output, indentation) << "Value of type \"" << typeName_ << "\"" << std::endl;
     for (DataObjectField *field : fields_)

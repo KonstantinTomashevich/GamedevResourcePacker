@@ -7,11 +7,11 @@ namespace ResourceSubsystem
 class RuntimeGroup
 {
 public:
-    explicit RuntimeGroup (unsigned int id) noexcept;
+    explicit RuntimeGroup (uint32_t id) noexcept;
     virtual ~RuntimeGroup ();
 
-    unsigned int GetId () const noexcept;
-    Object *Query (unsigned int id) const noexcept;
+    uint32_t GetId () const noexcept;
+    Object *Query (uint32_t id) const noexcept;
     bool Add (Object *object) noexcept;
     void DisposeUnused () noexcept;
 
@@ -19,8 +19,8 @@ public:
     void UnuseObject (Object *object) noexcept;
 
 private:
-    unsigned int id_;
-    std::unordered_map <unsigned int, Object *> used_;
-    std::unordered_map <unsigned int, Object *> unused_;
+    uint32_t id_;
+    std::unordered_map <uint32_t, Object *> used_;
+    std::unordered_map <uint32_t, Object *> unused_;
 };
 }

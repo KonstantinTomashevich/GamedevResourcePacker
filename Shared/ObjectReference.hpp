@@ -12,14 +12,14 @@ public:
 
     const std::string &GetClassName () const;
     const std::string &GetObjectName () const;
-    unsigned int GetClassNameHash () const;
-    unsigned int GetObjectNameHash () const;
-    void Resolve (unsigned int classNameHash, unsigned int objectNameHash);
+    uint32_t GetClassNameHash () const;
+    uint32_t GetObjectNameHash () const;
+    void Resolve (uint32_t classNameHash, uint32_t objectNameHash);
 
 private:
     std::string className_;
     std::string objectName_;
-    unsigned int classNameHash_;
-    unsigned int objectNameHash_;
+    uint32_t classNameHash_;
+    uint32_t objectNameHash_;
 };
 }
